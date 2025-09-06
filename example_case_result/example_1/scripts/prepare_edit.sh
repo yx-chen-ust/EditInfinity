@@ -1,1 +1,0 @@
-python prepare_edit_tools/create_train_splits.py --base_path /data1/chenyuxin/code/Infinity_clone/example_case/example_1/
