@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export PYTHONPATH=$PYTHONPATH:/data1/chenyuxin/code/Infinity_clone/  #设置相对路径
+export PYTHONPATH=$PYTHONPATH:  #设置相对路径
 
 set -euo pipefail
 set -x
@@ -12,7 +12,7 @@ set -x
 # 4) Run inference (load both text embedding and LoRA)
 
 # Paths (adjust only if your tree layout differs)
-EX1_ROOT="/data1/chenyuxin/code/Infinity_clone/example_case/example_2"
+EX1_ROOT="EditInfinity/example_case/example_2"
 PREPARE_SH="${EX1_ROOT}/scripts/prepare_edit.sh"
 TRAIN_SH="${EX1_ROOT}/scripts/train_EditInfinity_example2.sh"
 INFER_SH="${EX1_ROOT}/scripts/infer_EditInfinity_example2.sh"
