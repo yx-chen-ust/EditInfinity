@@ -18,27 +18,29 @@ text_encoder_ckpt=weights/flan-t5-xl
 text_channels=2048
 apply_spatial_patchify=0
 
-#选择inference的功能 1表示替换所有层的全部codes
+#Select inference function
 infer_function=1
 
-# 是否使用concat language style embedding
+# Whether to use concatenated language style embedding
 use_concat_embedding=0
-# 使用concat language style embedding的迭代次数
+# Iteration count for the concatenated language style embedding to use
 use_embedding_iter=10
 
 # LoRA parameters
-use_lora=0  # Whether to use LoRA (0: disable, 1: enable)
+use_lora=0
 lora_r=4    # LoRA rank
 lora_alpha=32  # LoRA alpha
 lora_dropout=0.1  # LoRA dropout rate
-use_lora_iter=50  # 使用LoRA权重的训练iter数
+use_lora_iter=50
 
+export CUDA_VISIBLE_DEVICES=0   #set GPU
+export PYTHONPATH=$PYTHONPATH:""  #Set its path ./EditInfinity as a relative path
 
-# 设置推理的数据路径
-infer_root_dir="/data1/chenyuxin/code/Infinity_clone/example_case/"
+ #set inference data path
+infer_root_dir="./EditInfinity/example_case/"
 infer_sub_dir="example_3/"
 
-# 设置 inference 的 prompt：基于 infer_root_dir 与 infer_sub_dir 组合路径，从文件读取并移除末尾换行
+#set inference prompt
 prompt_file="${infer_root_dir}${infer_sub_dir}prompt/original_image_prompt.txt"
 if [ -f "$prompt_file" ]; then
 prompt="$(tr -d '\n' < "$prompt_file")"
@@ -47,7 +49,7 @@ echo "Prompt file not found: $prompt_file" >&2
 exit 1
 fi
 
-#设置目标单词（用于cross attention map分析）
+#set target word（for cross attention map analysis）
 target_word_file="${infer_root_dir}${infer_sub_dir}prompt/target_word.txt"
 if [ -f "$prompt_file" ]; then
 target_words="$(tr -d '\n' < "$target_word_file")"
@@ -57,9 +59,6 @@ exit 1
 fi
 
 save_file="${infer_root_dir}${infer_sub_dir}output/original_image.jpg"
-
-export CUDA_VISIBLE_DEVICES=6   #设置GPU
-export PYTHONPATH=$PYTHONPATH:/data1/chenyuxin/code/Infinity_clone/  #设置相对路径
 
 # run inference
 python3 tools/run_infinity.py \
