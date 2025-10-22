@@ -37,16 +37,16 @@ def extract_key_val(text):
 
 def get_word_token_mapping(text_tokenizer, prompt, target_words=None):
     """
-    获取prompt中每个单词和指定短语对应的token范围。
-    target_words: None 或 list[str]，如 ['cat'] 或 ['a cat']
-    返回 dict: {word_or_phrase: (start, end)}
+    Get the token range for each word and specified phrases in the prompt.
+    target_words: None or list[str], e.g., ['cat'] or ['a cat']
+    Returns dict: {word_or_phrase: (start, end)}
     """
     tokenized = text_tokenizer(prompt, return_offsets_mapping=True)
     word_ids = tokenized.word_ids()
     offsets = tokenized.offset_mapping
     words = prompt.split()
 
-    # 单词到token范围
+    # Word to token range mapping
     word_to_tokens = {}
     current_word = None
     word_start = None
@@ -60,11 +60,11 @@ def get_word_token_mapping(text_tokenizer, prompt, target_words=None):
     if current_word is not None and current_word < len(words):
         word_to_tokens[words[current_word]] = (word_start, len(word_ids))
 
-    # 如果没有指定 target_words，返回所有单词的映射
+    # If no target_words specified, return mapping for all words
     if not target_words:
         return word_to_tokens
 
-    # 支持短语：只查找 prompt 中实际出现的连续短语
+    # Support phrases: only find actual consecutive phrases in the prompt
     phrase_to_tokens = {}
     prompt_words = words
     for phrase in target_words:
@@ -73,7 +73,7 @@ def get_word_token_mapping(text_tokenizer, prompt, target_words=None):
         found = False
         for i in range(len(prompt_words) - n + 1):
             if prompt_words[i:i+n] == phrase_split:
-                # 找到短语在 prompt 中的位置
+                # Find the position of the phrase in the prompt
                 first_word = prompt_words[i]
                 last_word = prompt_words[i+n-1]
                 if first_word in word_to_tokens and last_word in word_to_tokens:
@@ -83,7 +83,7 @@ def get_word_token_mapping(text_tokenizer, prompt, target_words=None):
                     found = True
                     break
         if not found:
-            # 不在prompt中则跳过
+            # Skip if phrase not found in prompt
             continue
     return phrase_to_tokens
 
@@ -109,17 +109,15 @@ def encode_prompt(text_tokenizer, text_encoder, prompt, enable_positive_prompt=F
         kv_compact.append(feat_i[:len_i])
     kv_compact = torch.cat(kv_compact, dim=0)
 
-    # 如果提供了embedding offset路径，则加载并添加到kv_compact上
     if embedding_offset_path is not None:
         print(f'Loading embedding offset from {embedding_offset_path}')
         embedding_offset = torch.load(embedding_offset_path, map_location='cuda')
         concat_length = 20
         offset_to_concat = embedding_offset[0, :concat_length, :]
         kv_compact = torch.cat([kv_compact, offset_to_concat], dim=0)
-        # 更新相关参数
-        lens = [l + concat_length for l in lens]  # 每个序列的长度+20
+        lens = [l + concat_length for l in lens] 
         cu_seqlens_k = torch.cat([cu_seqlens_k[:-1], cu_seqlens_k[-1:] + concat_length], dim=0)
-        Ltext = Ltext + concat_length  # 最大序列长度+20
+        Ltext = Ltext + concat_length 
 
     text_cond_tuple = (kv_compact, lens, cu_seqlens_k, Ltext)
     return text_cond_tuple
@@ -136,10 +134,10 @@ def enhance_image(image):
     for t in range(1):
         contrast_image = image.copy()
         contrast_enhancer = ImageEnhance.Contrast(contrast_image)
-        contrast_image = contrast_enhancer.enhance(1.05)  # 增强对比度
+        contrast_image = contrast_enhancer.enhance(1.05) 
         color_image = contrast_image.copy()
         color_enhancer = ImageEnhance.Color(color_image)
-        color_image = color_enhancer.enhance(1.05)  # 增强饱和度
+        color_image = color_enhancer.enhance(1.05) 
     return color_image
 
 def gen_one_img(
@@ -165,12 +163,12 @@ def gen_one_img(
     g_seed=None,
     sampling_per_bits=1,
     enable_positive_prompt=0,
-    infer_function=0,  #设置启动inference的什么功能
-    infer_root_dir=None,  # 添加根目录参数
-    infer_sub_dir=None,  # 添加子目录参数
+    infer_function=0,  
+    infer_root_dir=None, 
+    infer_sub_dir=None, 
     use_concat_embedding=0,
-    use_embedding_iter=0,  # 添加迭代次数参数 
-    target_words=None,  # 添加目标单词列表
+    use_embedding_iter=0, 
+    target_words=None,
 ):
     sstt = time.time()
     if not isinstance(cfg_list, list):
@@ -223,11 +221,11 @@ def gen_one_img(
             ret_img=True, trunk_scale=1000,
             gt_leak=gt_leak, gt_ls_Bl=gt_ls_Bl, inference_mode=True,
             sampling_per_bits=sampling_per_bits,
-            infer_function=infer_function,  # 传递infer_function参数，选择infer需要实现的功能
-            infer_root_dir=infer_root_dir,  # 传递根目录参数
-            infer_sub_dir=infer_sub_dir,  # 传递子目录参数
-            word_token_mapping=word_token_mapping,  # 传递word到token的映射
-            target_words=target_words,  # 传递目标单词列表
+            infer_function=infer_function,  
+            infer_root_dir=infer_root_dir, 
+            infer_sub_dir=infer_sub_dir, 
+            word_token_mapping=word_token_mapping,  
+            target_words=target_words, 
         )
     print(f"cost: {time.time() - sstt}, infinity cost={time.time() - stt}")
     img = img_list[0]
@@ -346,17 +344,13 @@ def load_infinity(
             lora_weights_path = os.path.join(infer_root_dir, infer_sub_dir, f'lora_weight/lora_weight_{use_lora_iter}iter.pt')
             lora_weights = torch.load(lora_weights_path, map_location=torch.device('cpu'))
 
-            # 3. 过滤并仅加载LoRA相关参数
             model_state_dict = infinity_test.state_dict()
 
-            # 更新模型状态字典，仅保留LoRA权重
             for name, param in lora_weights.items():
                 if name in model_state_dict:
                     if 'lora_A' in name:
-                        # 重塑 lora_A 为 [lora_r, -1]
                         model_state_dict[name].copy_(param.reshape(lora_r, -1))
                     elif 'lora_B' in name:
-                        # 重塑 lora_B 为 [-1, lora_r]
                         model_state_dict[name].copy_(param.reshape(-1, lora_r))
                 else:
                     print(f"Warning: LoRA weight '{name}' not found in model. Skipping.")
@@ -579,9 +573,7 @@ if __name__ == '__main__':
     scale_schedule = dynamic_resolution_h_w[args.h_div_w_template][args.pn]['scales']
     scale_schedule = [ (1, h, w) for (_, h, w) in scale_schedule]
 
-    # 修改这部分路径处理代码，为了之后可以concat
     if args.infer_sub_dir.startswith('/'):
-        # 如果是绝对路径，移除开头的斜杠
         infer_sub_dir = args.infer_sub_dir[1:] if args.infer_sub_dir.startswith('/') else args.infer_sub_dir
     else:
         infer_sub_dir = args.infer_sub_dir
@@ -609,7 +601,7 @@ if __name__ == '__main__':
                 infer_sub_dir=infer_sub_dir,
                 use_concat_embedding=args.use_concat_embedding,
                 use_embedding_iter=args.use_embedding_iter,
-                target_words=args.target_words,  # 使用命令行参数指定的目标单词
+                target_words=args.target_words,  
             )
     os.makedirs(osp.dirname(osp.abspath(args.save_file)), exist_ok=True)
     cv2.imwrite(args.save_file, generated_image.cpu().numpy())
