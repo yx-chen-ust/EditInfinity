@@ -1,6 +1,10 @@
 # EditInfinity: Image Editing with Binary-Quantized Generative Models
 An open-source T2I editing model based on Infinity
 
+<p align="center">
+<img src="assets/image1.jpg" width=95%>
+<p>
+  
 ## 🔥 Updates!!
 * Sep 22, 2025: 🤗 Code release
 * Sep 18, 2025: 🌺 EditInfinity is accepted as NeurIPS 2025 Poster
