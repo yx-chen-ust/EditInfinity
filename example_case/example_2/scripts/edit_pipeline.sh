@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-export PYTHONPATH=$PYTHONPATH:  #设置相对路径
+export PYTHONPATH=$PYTHONPATH:""  #Set its path ./EditInfinity as a relative path
 
 set -euo pipefail
 set -x
@@ -80,4 +80,3 @@ update_var "$INFER_SH" use_lora_iter 50
 bash "$INFER_SH"
 
 echo "Pipeline finished successfully."
-
