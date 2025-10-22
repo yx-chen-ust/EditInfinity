@@ -33,12 +33,13 @@ lora_alpha=32  # LoRA alpha
 lora_dropout=0.1  # LoRA dropout rate
 use_lora_iter=50
 
+export CUDA_VISIBLE_DEVICES=0   #set GPU
+export PYTHONPATH=$PYTHONPATH:""  #Set its path ./EditInfinity as a relative path
 
-# 设置推理的数据路径
-infer_root_dir="/data1/chenyuxin/code/Infinity_clone/example_case/"
+infer_root_dir="./EditInfinity/example_case/"  #set inference data path
 infer_sub_dir="example_1/"
 
-# 设置 inference 的 prompt：从文件读取并移除末尾换行
+#set inference prompt
 prompt_file="${infer_root_dir}${infer_sub_dir}prompt/edit_image_prompt.txt"
 if [ -f "$prompt_file" ]; then
 prompt="$(tr -d '\n' < "$prompt_file")"
@@ -48,9 +49,6 @@ exit 1
 fi
 
 save_file="${infer_root_dir}${infer_sub_dir}output/edit_result_example1.jpg"
-
-export CUDA_VISIBLE_DEVICES=2   #设置GPU
-export PYTHONPATH=$PYTHONPATH:/data1/chenyuxin/code/Infinity_clone/  #设置相对路径
 
 # run inference
 python3 tools/run_infinity.py \
