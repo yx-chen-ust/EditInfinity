@@ -64,18 +64,18 @@ class InfinityTrainer(object):
         self.text_embedding_offset = text_embedding_offset
         print(f'self.reweight_loss_by_scale: {self.reweight_loss_by_scale}')
         
-        # 添加KL散度相关参数
-        self.kl_weight = getattr(other_args, 'kl_weight', 0.1)  # KL散度的权重
-        self.use_kl_loss = getattr(other_args, 'use_kl_loss', False)  # 是否使用KL散度损失
-        
+        # Add KL divergence related parameters
+        self.kl_weight = getattr(other_args, 'kl_weight', 0.1)  # Weight for KL divergence  
+        self.use_kl_loss = getattr(other_args, 'use_kl_loss', False)  # Whether to use KL divergence loss
+
         self.using_ema = ema_ratio != 0 and self.zero == 0
         self.ema_ratio = abs(ema_ratio)
         self.ema_cpu = ema_ratio < 0
         self.is_visualizer = is_visualizer
 
-        # 添加LoRA相关参数
+        # Add LoRA related parameters  
         self.train_lora = getattr(other_args, 'train_lora', False)
-        self.lora_r = getattr(other_args, 'lora_r', 4)
+        self.lora_r = getattr(other_args, 'lora_r', 4)  # LoRA rank dimension
         
         gpt_uncompiled = self.gpt_wo_ddp._orig_mod if hasattr(self.gpt_wo_ddp, '_orig_mod') else self.gpt_wo_ddp
         del gpt_uncompiled.rng
@@ -193,13 +193,13 @@ class InfinityTrainer(object):
             training_seq_len = np.array(scale_schedule)[:training_scales].prod(axis=1).sum()
             x_BLC_wo_prefix = x_BLC_wo_prefix[:, :(training_seq_len-np.array(scale_schedule[0]).prod()), :]
 
-            # 在text_cond_tuple中添加偏移量（逐样本拼接，保持 kv_compact 与 lens 对齐）
+            # Add offset to text_cond_tuple (concatenated per sample, keeping kv_compact aligned with lens)
             if isinstance(text_cond_tuple, tuple) and args.train_textembedding:
                 kv_compact, lens, cu_seqlens_k, Ltext = text_cond_tuple
                 concat_length = 20
-                # 形状: [concat_length, Ct5]
+                # Shape: [concat_length, Ct5]
                 offset_to_concat = self.text_embedding_offset[0, :concat_length, :].to(kv_compact.device)
-                # 按样本切分 kv_compact，并在每个样本段末尾追加 offset
+                # Split kv_compact by sample and append offset to each segment
                 segments = []
                 start_idx = 0
                 for l in lens:
@@ -207,21 +207,21 @@ class InfinityTrainer(object):
                     segments.append(torch.cat([kv_compact[start_idx:end_idx], offset_to_concat], dim=0))
                     start_idx = end_idx
                 kv_compact = torch.cat(segments, dim=0)
-                # 重新计算 lens、cu_seqlens_k、Ltext
+                # Recalculate lens, cu_seqlens_k, Ltext
                 new_lens = [int(l) + concat_length for l in lens]
                 device = cu_seqlens_k.device
                 new_cu = torch.tensor([0] + list(np.cumsum(new_lens)), dtype=torch.int32, device=device)
                 new_Ltext = max(new_lens)
                 text_cond_tuple = (kv_compact, new_lens, new_cu, new_Ltext)
-            
-            # 在text_cond_tuple中添加偏移量（逐样本拼接，保持 kv_compact 与 lens 对齐）
+
+            # Add offset to text_cond_tuple (concatenated per sample, keeping kv_compact aligned with lens)
             if isinstance(text_cond_tuple, tuple) and args.use_textembedding and args.train_lora:
                 kv_compact, lens, cu_seqlens_k, Ltext = text_cond_tuple
                 concat_length = 20
-                # 获取训练数据集的根目录和子目录
+                # Get root and sub directories of training dataset
                 full_path = os.path.join(args.train_root_dir, args.train_sub_dir, f"trained_language_style_embedding/embedding_it{args.use_textembedding_iter-1}.pth")
                 offset_to_concat = torch.load(full_path, map_location='cpu')[0, :concat_length, :].to(kv_compact.device)
-                # 按样本切分 kv_compact，并在每个样本段末尾追加 offset
+                # Split kv_compact by sample and append offset to each segment
                 segments = []
                 start_idx = 0
                 for l in lens:
@@ -229,7 +229,7 @@ class InfinityTrainer(object):
                     segments.append(torch.cat([kv_compact[start_idx:end_idx], offset_to_concat], dim=0))
                     start_idx = end_idx
                 kv_compact = torch.cat(segments, dim=0)
-                # 重新计算 lens、cu_seqlens_k、Ltext
+                # Recalculate lens, cu_seqlens_k, Ltext
                 new_lens = [int(l) + concat_length for l in lens]
                 device = cu_seqlens_k.device
                 new_cu = torch.tensor([0] + list(np.cumsum(new_lens)), dtype=torch.int32, device=device)
@@ -255,24 +255,15 @@ class InfinityTrainer(object):
             else:
                 loss = self.train_loss(logits_BLV.reshape(-1, V), gt_BL.reshape(-1)).reshape(B, -1)
 
-            # 添加KL散度损失计算
+            #Add KL Divergence Loss Calculation
             if self.use_kl_loss and args.train_lora:
-                #print(f'logits_BLV.shape: {logits_BLV.shape}')  #logits_BLV.shape: torch.Size([1, 10521, 64])
-                #print(f'gt_BL.shape: {gt_BL.shape}')  #gt_BL.shape: torch.Size([1, 10521, 32])
                 batch_size = args.lbs
-                # 将logits_BLV重塑为[1, 10521, 32, 2]
                 logits_BLV_kl = logits_BLV.view(batch_size, 10521, 32, 2)
-                #print(f'logits_BLV: {logits_BLV}')
-                # 计算每个位置的softmax概率
-                probs_gen = F.softmax(logits_BLV_kl, dim=-1)  # [1, 10521, 32, 2]
-                #print(f'gt_BL: {gt_BL}')
-                # 将gt_BL转换为one-hot编码
-                gt_BL_kl = F.one_hot(gt_BL, num_classes=2).float()  # [1, 10521, 32, 2]
-                #print(f'gt_BL: {gt_BL}')
-                # 计算KL散度
+                probs_gen = F.softmax(logits_BLV_kl, dim=-1)  
+                gt_BL_kl = F.one_hot(gt_BL, num_classes=2).float() 
                 kl_loss = F.kl_div(
-                    probs_gen.log(),  # 输入需要是log概率
-                    gt_BL_kl,            # 目标概率
+                    probs_gen.log(),  
+                    gt_BL_kl,           
                     reduction='batchmean',
                     log_target=False
                 )
@@ -381,7 +372,7 @@ class InfinityTrainer(object):
     # p_ema = p_ema*0.9 + p*0.1 <==> p_ema.lerp_(p, 0.1)
     # p_ema.mul_(self.ema_ratio).add_(p.mul(self.ema_ratio_1))
     # @profile(precision=4, stream=open('ema_update.log', 'w+'))
-    def ema_update(self, g_it): # todo: 将来再用离线ema
+    def ema_update(self, g_it):
         # if self.using_ema and (g_it + 1) in self.ema_upd_it:
         stt = time.time()
         for pi, p_ema in self.pi_para_copy_for_parallel_ema:
@@ -493,13 +484,13 @@ class InfinityTrainer(object):
 
 
     def save_embedding(self, path):
-        """保存当前的embedding"""
-        # 确保目录存在
+        """Save current embedding"""
+        # Ensure directory exists
         os.makedirs(os.path.dirname(path), exist_ok=True)
-        # 保存embedding
+        # Save embedding
         torch.save(self.text_embedding_offset, path)
         
-        # 打印embedding的统计信息
+        # Print embedding statistics
         embedding_data = self.text_embedding_offset.detach().cpu().numpy()
         print(f"\nEmbedding Statistics:")
         print(f"Shape: {embedding_data.shape}")
