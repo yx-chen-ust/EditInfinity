@@ -1,120 +1,112 @@
-# Example3 图像编辑管道使用说明
+Example3 Image Editing Pipeline User Guide
 
-## 功能概述
-Example3 是一个智能图像编辑管道，具有以下核心特点：
-- **自动背景保留**：无需人工提供遮罩图像，通过注意力机制自动识别前景和背景
-- **智能遮罩生成**：基于注意力图自动生成前景遮罩和背景保留权重
-- **两阶段训练**：先训练语言风格嵌入，再训练LoRA模型，确保编辑质量
+Overview
+Example3 is an intelligent image editing pipeline with the following key features:  
+• Automatic Background Preservation: Automatically identifies foreground and background through attention mechanisms without requiring manual mask images  
+• Smart Mask Generation: Automatically generates foreground masks and background preservation weights based on attention maps  
+• Two-Stage Training: First trains text embeddings, then trains the LoRA model to ensure editing quality  
 
-## 前置准备
-在运行管道前，请确保以下文件已准备就绪：
+Prerequisites
+Before running the pipeline, ensure the following files are prepared:  
+Required Files
+1. Original Image: image/original_image.jpg  
+2. Original Image Description: prompt/original_image_prompt.txt – describes the content of the original image  
+3. Edit Prompt: prompt/edit_image_prompt.txt – describes how the image should be edited  
+4. Target Keyword: prompt/target_word.txt – specifies the target word to focus on  
 
-### 必需文件
-1. **原始图像**：`image/original_image.jpg`
-2. **原图描述**：`prompt/original_image_prompt.txt` - 描述原始图像的内容
-3. **编辑提示词**：`prompt/edit_image_prompt.txt` - 描述希望如何编辑图像
-4. **目标关键词**：`prompt/target_word.txt` - 指定需要关注的目标词汇
+Environment Requirements
+• Ensure all dependency environments are properly installed  
+• Set up the correct Python path and CUDA environment  
 
-### 环境要求
-- 确保所有依赖环境已正确安装
-- 设置正确的Python路径和CUDA环境
+Pipeline Execution Flow
 
-## 管道执行流程
+Step 1: Data Preparation
+Script: prepare_edit.sh  
+Function:  
+• Generates segmentation files (JSONL format) for the training dataset  
+• Extracts multi-scale encoded features from images  
+• Prepares necessary data structures for subsequent training  
 
-### 步骤1：数据准备
-**脚本：** `prepare_edit.sh`
-**功能：**
-- 生成训练数据集的分割文件（JSONL格式）
-- 提取图像的多尺度编码特征
-- 为后续训练准备必要的数据结构
+Step 2: Text Embedding Training
+Script: train_EditInfinity_example3.sh  
+Parameter Settings:  
+train_textembedding=1          # Enable text embedding training  
+train_textembedding_iter=10    # Train for 10 iterations  
+use_textembedding=0            # Do not use pre-trained embeddings during training  
+train_lora=0                   # Do not train LoRA in this stage  
+  
+Step 3: LoRA Model Training
+Script: train_EditInfinity_example3.sh  
+Parameter Settings:  
+train_textembedding=0          # Stop text embedding training  
+use_textembedding=1            # Use text embeddings trained in Step 2  
+use_textembedding_iter=10      # Use embedding weights from the 10th iteration  
+train_lora=1                   # Enable LoRA training  
+train_lora_iter=20             # Train for 20 iterations  
+  
+Alternative Option: If you don't want to load text embeddings, set:  
+train_textembedding=0  
+use_textembedding=0            # Do not load text embeddings  
+train_lora=1  
+train_lora_iter=20  
+  
+Step 4: Attention Map Generation
+Script: get_targetword_attentionmap_example3.sh  
+Function:  
+• Uses the trained model to generate attention maps for target words  
+• Attention maps identify foreground regions in the image that need editing  
+• Set infer_function=1 specifically for generating attention maps  
 
-### 步骤2：语言风格嵌入训练
-**脚本：** `train_EditInfinity_example3.sh`
-**参数设置：**
-```bash
-train_textembedding=1          # 启用语言风格嵌入训练
-train_textembedding_iter=10    # 训练10个迭代周期
-use_textembedding=0            # 训练阶段不使用预训练嵌入
-train_lora=0                   # 此阶段不训练LoRA
-```
+Step 5: Mask and Weight Tensor Generation
+Script: get_weighted_tensor.sh  
+Function:  
+• Generates foreground mask images (mask.png) based on attention maps  
+• Creates weight tensors for background preservation  
+• Generates visual analysis images of attention maps  
 
-### 步骤3：LoRA模型训练
-**脚本：** `train_EditInfinity_example3.sh`
-**参数设置：**
-```bash
-train_textembedding=0          # 停止语言风格嵌入训练
-use_textembedding=1            # 使用步骤2训练的语言风格嵌入
-use_textembedding_iter=10      # 使用第10个迭代的嵌入权重
-train_lora=1                   # 启用LoRA训练
-train_lora_iter=20             # 训练20个迭代周期
-```
+Step 6: Final Image Inference
+Script: infer_EditInfinity_example3.sh  
+Parameter Settings:  
+infer_function=2               # Used for final image generation  
+use_concat_embedding=1         # Use concatenated text embeddings  
+use_embedding_iter=10          # Use embeddings from the 10th iteration  
+use_lora=1                     # Use LoRA model  
+use_lora_iter=20               # Use LoRA weights from the 20th iteration  
+  
 
-**替代方案：** 如果不想加载语言风格嵌入，可以设置：
-```bash
-train_textembedding=0
-use_textembedding=0            # 不加载语言风格嵌入
-train_lora=1
-train_lora_iter=20
-```
+Parameter Explanation
 
-### 步骤4：注意力图生成
-**脚本：** `get_targetword_attentionmap_example3.sh`
-**功能：**
-- 使用训练好的模型生成目标词的注意力图
-- 注意力图用于识别图像中需要编辑的前景区域
-- 设置 `infer_function=1` 专门用于生成注意力图
+Training Parameters
+• train_textembedding: Whether to start text embedding training (0/1)  
+• train_textembedding_iter: Number of iterations for text embedding training  
+• use_textembedding: Whether to use pre-trained text embeddings (0/1)  
+• use_textembedding_iter: Which iteration's text embedding weights to use  
+• train_lora: Whether to start LoRA training (0/1)  
+• train_lora_iter: Number of iterations for LoRA training  
 
-### 步骤5：遮罩和权重张量生成
-**脚本：** `get_weighted_tensor.sh`
-**功能：**
-- 基于注意力图生成前景遮罩图像（`mask.png`）
-- 创建背景前景保留的权重张量
-- 生成注意力图的可视化分析图像
+Inference Parameters
+• infer_function:  
+  • 1: Generate attention maps  
+  • 2: Generate final edited images  
+• use_concat_embedding: Whether to use concatenated text embeddings (0/1)  
+• use_embedding_iter: Which iteration's text embeddings to use  
+• use_lora: Whether to use LoRA model (0/1)  
+• use_lora_iter: Which iteration's LoRA weights to use  
 
-### 步骤6：最终图像推理
-**脚本：** `infer_EditInfinity_example3.sh`
-**参数设置：**
-```bash
-infer_function=2               # 用于最终图像生成
-use_concat_embedding=1         # 使用拼接的语言风格嵌入
-use_embedding_iter=10          # 使用第10个迭代的嵌入
-use_lora=1                     # 使用LoRA模型
-use_lora_iter=20               # 使用第20个迭代的LoRA权重
-```
+Quick Start
+1. Prepare required files (images and prompt files)  
+2. Run edit_pipeline.sh to start automated processing  
+3. Wait for the pipeline execution to complete  
+4. Check the result files in the output directory  
 
-## 参数说明
+Output Results
+After pipeline execution completes, the following will be generated:  
+• Trained model weight files  
+• Attention maps and analysis images  
+• Foreground mask images (mask.png)  
+• Final edited images (with original background preserved)  
 
-### 训练参数
-- **`train_textembedding`**：是否启动语言风格嵌入训练（0/1）
-- **`train_textembedding_iter`**：语言风格嵌入训练的迭代次数
-- **`use_textembedding`**：是否使用预训练的语言风格嵌入（0/1）
-- **`use_textembedding_iter`**：使用哪个迭代的语言风格嵌入权重
-- **`train_lora`**：是否启动LoRA训练（0/1）
-- **`train_lora_iter`**：LoRA训练的迭代次数
-
-### 推理参数
-- **`infer_function`**：
-  - `1`：生成注意力图
-  - `2`：生成最终编辑图像
-- **`use_concat_embedding`**：是否使用拼接的语言风格嵌入（0/1）
-- **`use_embedding_iter`**：使用哪个迭代的语言风格嵌入
-- **`use_lora`**：是否使用LoRA模型（0/1）
-- **`use_lora_iter`**：使用哪个迭代的LoRA权重
-
-## 快速开始
-1. 准备必需的文件（图像和提示词文件）
-2. 运行 `edit_pipeline.sh` 开始自动化处理
-3. 等待管道执行完成
-4. 查看输出目录中的结果文件
-
-## 输出结果
-管道执行完成后，将生成：
-- 训练好的模型权重文件
-- 注意力图和分析图像
-- 前景遮罩图像（`mask.png`）
-- 最终编辑后的图像（保留原始背景）
-
-## 注意事项
-- 可以仅使用语言风格嵌入或仅使用LoRA，只需将对应的参数设置为0
-- 确保各步骤的迭代次数设置一致，避免加载不存在的权重
-- 建议按照推荐的参数设置进行首次运行，后续可根据需要调整
+Notes
+• You can use only text embeddings or only LoRA by setting the corresponding parameters to 0  
+• Ensure iteration settings are consistent across steps to avoid loading non-existent weights  
+• It is recommended to use the suggested parameter settings for the first run, which can be adjusted as needed later
