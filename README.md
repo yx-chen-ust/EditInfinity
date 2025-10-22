@@ -1,5 +1,4 @@
 # EditInfinity: Image Editing with Binary-Quantized Generative Models
-An open-source T2I editing model based on Infinity
 
 <p align="center">
 <img src="assets/image1.jpg" width=95%>
