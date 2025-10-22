@@ -50,24 +50,25 @@ export CUDA_TIMER_STREAM_KAFKA_CLUSTER=bmq_data_va
 export CUDA_TIMER_STREAM_KAFKA_TOPIC=megatron_cuda_timer_tracing_original_v2
 export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 
-train_root_dir="/data1/chenyuxin/code/Infinity_clone/example_case/"
+train_root_dir="./EditInfinity/example_case/"  #set inference data path
 train_sub_dir="example_2/"
 
 
-#是否启动语言风格embedding训练
-train_textembedding=0
-#需要训练的语言风格embedding iter数
-train_textembedding_iter=0
+# Whether to start text embedding training  
+train_textembedding = 0  
+# Number of iterations for training text embedding  
+train_textembedding_iter = 0  
 
-# 使用的训练语言风格偏移量embedding的iter数
-use_textembedding=1
-use_textembedding_iter=10
-#是否启动Lora训练
-train_lora=1
-#需要训练的lora iter数
-train_lora_iter=50
+# Number of iterations for using trained text embedding offset  
+use_textembedding = 1  
+use_textembedding_iter = 10  
 
-# 断言：train_textembedding 和 train_lora 至多只能有一个为 1
+# Whether to start LoRA training  
+train_lora = 1  
+# Number of iterations for training LoRA  
+train_lora_iter = 50  
+
+# Assertion: At most one of train_textembedding and train_lora can be set to 1
 if [ "${train_textembedding}" -eq 1 ] && [ "${train_lora}" -eq 1 ]; then
 echo "Error: train_textembedding and train_lora cannot both be 1" >&2
 exit 1
@@ -80,12 +81,12 @@ data_path="${train_root_dir}${train_sub_dir}splits"   # path to the data for onl
 video_data_path=''
 local_out_path=$LOCAL_OUT/${exp_name}
 
-
+#master_addr:Set the current server master addr
 torchrun \
 --nproc_per_node=2 \
 --nnodes=1 \
 --node_rank=0 \
---master_addr="10.249.189.212" \
+--master_addr="**.***.***.***" \
 --master_port=2988 \
 train.py \
 --ep=2 \
@@ -155,6 +156,3 @@ train.py \
 --train_sub_dir=${train_sub_dir} \
 --use_textembedding=${use_textembedding} \
 --use_textembedding_iter=${use_textembedding_iter} \
-
-#lbs is batchsize
-#--pn 1M means 1024*1024 pixels
