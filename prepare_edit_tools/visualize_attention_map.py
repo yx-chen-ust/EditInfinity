@@ -5,52 +5,52 @@ import os
 
 def visualize_attention_map(attention_map_path, save_path=None, threshold: float = 0.5):
     """
-    可视化attention map，使用红蓝热力图
+    Visualize attention map using red-blue heatmap
     
     Args:
-        attention_map_path: attention map的.pt文件路径
-        save_path: 保存图片的路径，如果为None则显示图片
+        attention_map_path: Path to .pt file containing attention map
+        save_path: Path to save the visualization image. If None, displays the image
     """
-    # 加载attention map
+    # Load attention map
     attention_map = torch.load(attention_map_path)
     print(f"Attention map shape: {attention_map.shape}")
     print(f"Attention map dtype: {attention_map.dtype}")
     
-    # 转换为numpy数组
+    # Convert to numpy array if it's a torch tensor
     if isinstance(attention_map, torch.Tensor):
         attention_map = attention_map.cpu().numpy()
     
-    # 创建图形
+    # Create figure
     plt.figure(figsize=(10, 8))
     
-    # 使用红蓝热力图
-    # 红色表示高注意力，蓝色表示低注意力
+    # Use red-blue heatmap
+    # Red indicates high attention, blue indicates low attention
     im = plt.imshow(attention_map, cmap='RdBu_r', interpolation='nearest')
     
-    # 添加颜色条
+    # Add colorbar
     cbar = plt.colorbar(im, fraction=0.046, pad=0.04)
     cbar.set_label('Attention Weight', rotation=270, labelpad=15)
     
-    # 获取颜色条中白色对应的数值（位于 [min, max] 的阈值位置，默认 0.5 为中点）
+    # Calculate the value corresponding to white in colorbar (threshold position between min and max, default 0.5 as midpoint)
     white_value = attention_map.min() + float(threshold) * (attention_map.max() - attention_map.min())
     print(f"Colorbar white value: {white_value:.6f}")
     print(f"Data range: [{attention_map.min():.6f}, {attention_map.max():.6f}]")
     
-    # 设置标题
+    # Set title
     word_name = os.path.basename(attention_map_path).replace('_final_attention_map.pt', '')
     plt.title(f'Cross-Attention Map for "{word_name}" (64x64)', fontsize=14, fontweight='bold')
     
-    # 设置坐标轴
+    # Set axis labels
     plt.xlabel('Width', fontsize=12)
     plt.ylabel('Height', fontsize=12)
     
-    # 添加网格
+    # Add grid
     plt.grid(True, alpha=0.3)
     
-    # 调整布局
+    # Adjust layout
     plt.tight_layout()
     
-    # 保存或显示图片
+    # Save or display the image
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         print(f"Saved visualization to: {save_path}")
@@ -61,21 +61,22 @@ def visualize_attention_map(attention_map_path, save_path=None, threshold: float
 
 def generate_attention_mask(attention_map_path, save_path=None, coord_save_path=None, threshold: float = 0.5):
     """
-    生成cross-attention mask：大于白色对应值的部分设为黑色，其余为白色，并可保存黑色位置坐标
+    Generate cross-attention mask: areas above white threshold value set to black (0), others to white (1)
+    Optionally save coordinates of black positions
     """
-    # 加载attention map
+    # Load attention map
     attention_map = torch.load(attention_map_path)
     if isinstance(attention_map, torch.Tensor):
         attention_map = attention_map.cpu().numpy()
     
-    # 计算白色对应的数值（阈值 0-1，默认 0.5 为中点）
+    # Calculate white threshold value (between 0-1, default 0.5 as midpoint)
     white_value = attention_map.min() + float(threshold) * (attention_map.max() - attention_map.min())
     
-    # 生成mask：大于白色值的设为黑色（0），其余为白色（1）
+    # Generate mask: areas above white value set to black (0), others to white (1)
     mask = np.ones_like(attention_map)
     mask[attention_map > white_value] = 0
     
-    # 保存mask图片
+    # Save mask image
     plt.figure(figsize=(8, 8))
     plt.imshow(mask, cmap='gray', vmin=0, vmax=1)
     plt.axis('off')
@@ -91,56 +92,56 @@ def generate_attention_mask(attention_map_path, save_path=None, coord_save_path=
 
 def visualize_attention_map_with_original_image(attention_map_path, original_image_path=None, save_path=None, threshold: float = 0.5):
     """
-    可视化attention map，可以选择叠加到原始图像上
+    Visualize attention map with option to overlay on original image
     
     Args:
-        attention_map_path: attention map的.pt文件路径
-        original_image_path: 原始图像路径（可选）
-        save_path: 保存图片的路径
+        attention_map_path: Path to .pt file containing attention map
+        original_image_path: Path to original image (optional)
+        save_path: Path to save the visualization image
     """
-    # 加载attention map
+    # Load attention map
     attention_map = torch.load(attention_map_path)
     if isinstance(attention_map, torch.Tensor):
         attention_map = attention_map.cpu().numpy()
     
-    # 创建子图
+    # Create subplots
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
     
-    # 第一个子图：纯attention map
+    # First subplot: pure attention map
     im1 = axes[0].imshow(attention_map, cmap='RdBu_r', interpolation='nearest')
     axes[0].set_title('Cross-Attention Map', fontsize=12, fontweight='bold')
     axes[0].set_xlabel('Width')
     axes[0].set_ylabel('Height')
     axes[0].grid(True, alpha=0.3)
     
-    # 添加颜色条
+    # Add colorbar
     cbar1 = plt.colorbar(im1, ax=axes[0], fraction=0.046, pad=0.04)
     cbar1.set_label('Attention Weight')
     
-    # 获取颜色条中白色对应的数值
+    # Calculate white threshold value
     white_value = attention_map.min() + float(threshold) * (attention_map.max() - attention_map.min())
     print(f"Colorbar white value: {white_value:.6f}")
     print(f"Data range: [{attention_map.min():.6f}, {attention_map.max():.6f}]")
     
-    # 第二个子图：如果有原始图像，则叠加显示
+    # Second subplot: overlay with original image if available
     if original_image_path and os.path.exists(original_image_path):
         from PIL import Image
         import cv2
         
-        # 加载原始图像
+        # Load original image
         original_img = Image.open(original_image_path)
         original_img = np.array(original_img)
         
-        # 将attention map resize到原始图像大小
+        # Resize attention map to match original image dimensions
         attention_map_resized = cv2.resize(attention_map, (original_img.shape[1], original_img.shape[0]))
         
-        # 归一化attention map到0-1范围
+        # Normalize attention map to [0,1] range
         attention_map_normalized = (attention_map_resized - attention_map_resized.min()) / (attention_map_resized.max() - attention_map_resized.min())
         
-        # 创建热力图
-        heatmap = plt.cm.RdBu_r(attention_map_normalized)[:, :, :3]  # 只取RGB通道
+        # Create heatmap
+        heatmap = plt.cm.RdBu_r(attention_map_normalized)[:, :, :3]  # Take only RGB channels
         
-        # 叠加到原始图像上
+        # Overlay on original image
         alpha = 0.6
         overlay = original_img * (1 - alpha) + heatmap * 255 * alpha
         
@@ -148,21 +149,21 @@ def visualize_attention_map_with_original_image(attention_map_path, original_ima
         axes[1].set_title('Attention Map Overlay', fontsize=12, fontweight='bold')
         axes[1].axis('off')
     else:
-        # 如果没有原始图像，显示attention map的统计信息
+        # If no original image, show attention map statistics
         axes[1].hist(attention_map.flatten(), bins=50, alpha=0.7, color='blue', edgecolor='black')
         axes[1].set_title('Attention Weight Distribution', fontsize=12, fontweight='bold')
         axes[1].set_xlabel('Attention Weight')
         axes[1].set_ylabel('Frequency')
         axes[1].grid(True, alpha=0.3)
     
-    # 设置总标题
+    # Set main title
     word_name = os.path.basename(attention_map_path).replace('_final_attention_map.pt', '')
     fig.suptitle(f'Cross-Attention Analysis for "{word_name}"', fontsize=16, fontweight='bold')
     
-    # 调整布局
+    # Adjust layout
     plt.tight_layout()
     
-    # 保存或显示图片
+    # Save or display the image
     if save_path:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         print(f"Saved visualization to: {save_path}")
@@ -185,20 +186,20 @@ if __name__ == "__main__":
     output_dir = os.path.join(base_path, 'cross_attention_maps')
     os.makedirs(output_dir, exist_ok=True)
 
-    # 检查文件是否存在
+    # Check if file exists
     if not os.path.exists(attention_map_path):
         print(f"Error: File not found: {attention_map_path}")
         exit(1)
 
-    # 如果存在原始图像则叠加可视化
+    # If original image exists, prepare for overlay visualization
     candidate_img = os.path.join(base_path, 'image', 'original_image.jpg')
     original_image_path = candidate_img if os.path.exists(candidate_img) else None
 
-    # 可视化：带统计信息/叠加原图
+    # Visualization: with statistics/overlay
     save_vis = os.path.join(output_dir, "attention_analysis.png")
     visualize_attention_map_with_original_image(attention_map_path, save_path=save_vis, original_image_path=original_image_path, threshold=args.threshold)
 
-    # 生成 attention mask
+    # Generate attention mask
     mask_output_dir = os.path.join(base_path, 'image')
     save_mask = os.path.join(mask_output_dir, "mask.png")
     mask, threshold = generate_attention_mask(attention_map_path, save_mask, coord_save_path=None, threshold=args.threshold)
