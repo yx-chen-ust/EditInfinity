@@ -400,9 +400,9 @@ class CrossAttention(nn.Module):
         kv_compact, cu_seqlens_k, max_seqlen_k = ca_kv
         N = kv_compact.shape[0]
 
-        kv_compact = self.mat_kv(kv_compact).view(N, 2, self.num_heads, self.head_dim)  #适应lora的实现
+        kv_compact = self.mat_kv(kv_compact).view(N, 2, self.num_heads, self.head_dim)  #Implementation adapting to LoRA
         
-        #kv_compact = F.linear(kv_compact, weight=self.mat_kv.weight, bias=torch.cat((self.zero_k_bias, self.v_bias))).view(N, 2, self.num_heads, self.head_dim) # NC => N2Hc   #原始实现
+        #kv_compact = F.linear(kv_compact, weight=self.mat_kv.weight, bias=torch.cat((self.zero_k_bias, self.v_bias))).view(N, 2, self.num_heads, self.head_dim) # NC => N2Hc   #original Implementation
         #attn_bias = xformers.ops.fmha.BlockDiagonalMask.from_seqlens
         
         if not self.for_attn_pool:
@@ -430,90 +430,59 @@ class CrossAttention(nn.Module):
         else:
             oup = flash_attn_varlen_kvpacked_func(q=q_compact, kv=kv_compact, cu_seqlens_q=cu_seqlens_q, cu_seqlens_k=cu_seqlens_k, max_seqlen_q=Lq, max_seqlen_k=max_seqlen_k, dropout_p=0, softmax_scale=self.scale).reshape(B, Lq, -1)
         
-        # 收集attention maps用于目标单词
+        # Collect attention maps for target words
         if word_token_mapping is not None and target_words is not None and layer_idx is not None:
-            # 计算attention weights（这里需要重新计算，因为flash attention没有直接返回weights）
+            # Calculate attention weights
             k, v = kv_compact.unbind(dim=1)  # [N, num_heads, head_dim]
             
-            # q_compact的形状是[B*Lq, num_heads, head_dim]，其中B是实际的batch size（包括CFG的正负样本）
-            # 我们需要只取正样本部分来计算attention map
+            # q_compact shape is [B*Lq, num_heads, head_dim], where B is actual batch size (including CFG positive/negative samples)
+            # We only need positive samples to calculate attention map
             total_seq_len = q_compact.shape[0]  # B*Lq
-            actual_B = total_seq_len // Lq  # 实际的batch size
-            positive_B = actual_B // 2  # 正样本的数量（CFG情况下）
+            actual_B = total_seq_len // Lq  # Actual batch size
+            positive_B = actual_B // 2  # Number of positive samples (in CFG case)
             
-            # 只取正样本的q_compact
-            q_compact_positive = q_compact[:positive_B * Lq]  # 只取正样本部分
+            # Take only positive samples from q_compact
+            q_compact_positive = q_compact[:positive_B * Lq]  # Only positive samples
             
-            # # 添加调试信息
-            # print(f"Debug - q_compact shape: {q_compact.shape}, total_seq_len: {total_seq_len}, actual_B: {actual_B}, positive_B: {positive_B}, Lq: {Lq}, num_heads: {self.num_heads}, head_dim: {self.head_dim}")
-            # print(f"Debug - k shape: {k.shape}, N: {N}")
-            # print(f"Debug - kv_compact shape: {kv_compact.shape}")
-            # print(f"Debug - q_compact_positive shape: {q_compact_positive.shape}")
-            
-            # 重新计算attention scores
-            # 由于positive_B=1，我们忽略这个维度，直接使用多头attention的标准计算方式
+            # Recalculate attention scores
+            # Since positive_B=1, we ignore this dimension and use standard multi-head attention calculation
             q_expanded = q_compact_positive.view(Lq, self.num_heads, self.head_dim)  # [Lq, num_heads, head_dim]
-            # 由于CFG，k的维度被扩展了，实际只需要使用前半部分
+            # Due to CFG, k dimension is expanded - we only need first half
             k_expanded = k.view(N, self.num_heads, self.head_dim)[:N//2]  # [N//2, num_heads, head_dim]
-            
-            # print(f"Debug - q_expanded shape: {q_expanded.shape}")
-            # print(f"Debug - k_expanded shape: {k_expanded.shape}")
-            
-            # 调整维度顺序为 [num_heads, seq_len, head_dim]
+
+            # Rearrange dimensions to [num_heads, seq_len, head_dim]
             q_transposed = q_expanded.transpose(0, 1)  # [num_heads, Lq, head_dim]
             k_transposed = k_expanded.transpose(0, 1)  # [num_heads, N//2, head_dim]
             
-            # 计算attention scores: [num_heads, Lq, N//2]
+            # Calculate attention scores: [num_heads, Lq, N//2]
             attn_scores = torch.matmul(q_transposed, k_transposed.transpose(-2, -1)) * self.scale
             attn_weights = torch.softmax(attn_scores, dim=-1)  # [num_heads, Lq, N//2]
             
-            # 调整回原来的维度顺序: [Lq, num_heads, N//2]
+            # Restore original dimension order: [Lq, num_heads, N//2]
             attn_weights = attn_weights.transpose(0, 1)  # [Lq, num_heads, N//2]
             
-            # 处理目标单词
+            # Process target words
             for word_id, (start_token, end_token) in word_token_mapping.items():
-                # print(f"Debug - word_id: {word_id}, start_token: {start_token}, end_token: {end_token}")
-                # print(f"Debug - attn_weights shape: {attn_weights.shape}")
-                # print(f"Debug - target_words: {target_words}")
                 if word_id in target_words:
-                    # 确保token范围在有效范围内（在N//2维度上，即文本token维度）
-                    # print(f"Debug - word_id: {word_id}, start_token: {start_token}, end_token: {end_token}")
-                    # print(f"Debug - N: {N}, N//2: {N//2}")
-                    # exit()
                     if start_token < N//2 and end_token <= N//2:
-                        # 提取该单词所有token的attention maps
-                        # attn_weights: [Lq, num_heads, N//2]，我们需要在N//2维度上提取单词对应的部分
                         word_tokens_attention = attn_weights[:, :, start_token:end_token]  # [Lq, num_heads, num_tokens]
-                        
-                        # 合并该单词的所有token的attention（取平均）
                         word_avg_attention = word_tokens_attention.mean(dim=2)  # [Lq, num_heads]
-                        
-                        # 合并所有head的attention（取平均）
                         word_final_attention = word_avg_attention.mean(dim=1)  # [Lq]
-                        
-                        # 将attention map resize到64x64的统一尺度
-                        # word_final_attention: [Lq] -> reshape为当前层的空间维度，然后resize到64x64
-                        current_h = int(Lq ** 0.5)  # 假设是正方形
+                        current_h = int(Lq ** 0.5)  
                         current_w = current_h
-                        
-                        # 将attention map reshape为空间维度
                         attention_spatial = word_final_attention.view(current_h, current_w)  # [h, w]
-                        
-                        # resize到64x64
                         attention_64x64 = F.interpolate(
                             attention_spatial.unsqueeze(0).unsqueeze(0),  # [1, 1, h, w]
                             size=(64, 64),
                             mode='bilinear',
                             align_corners=False
                         ).squeeze(0).squeeze(0)  # [64, 64]
-                        
-                        # 直接保存最终的attention map
+
                         if not hasattr(self, 'final_attention_maps'):
                             self.final_attention_maps = {}
                         if not hasattr(self, 'attention_map_counts'):
                             self.attention_map_counts = {}
-                        
-                        # 如果已经有这个单词的attention map，则累加（用于计算均值）
+
                         if word_id in self.final_attention_maps:
                             self.final_attention_maps[word_id] += attention_64x64
                             self.attention_map_counts[word_id] += 1
@@ -694,7 +663,6 @@ def main():
     ca = CrossAttention(for_attn_pool=False, embed_dim=Cq, kv_dim=Ckv, num_heads=H)
     CrossAttention.forward
     ca(q, (kv_compact, cu_seqlens_k, max(Li))).mean().backward()
-
 
 if __name__ == '__main__':
     main()
