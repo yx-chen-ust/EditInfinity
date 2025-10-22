@@ -123,24 +123,20 @@ class LoRALinear(nn.Module):
     def __init__(self, linear_layer, r=8, lora_alpha=16, lora_dropout=0.05):
         super().__init__()
         self.original = linear_layer
-        self.lora_A = nn.Parameter(torch.zeros(r, linear_layer.in_features))  # 低秩矩阵 A
-        self.lora_B = nn.Parameter(torch.zeros(linear_layer.out_features, r)) # 低秩矩阵 B
-        self.scaling = lora_alpha / r  # 缩放因子
+        self.lora_A = nn.Parameter(torch.zeros(r, linear_layer.in_features)) 
+        self.lora_B = nn.Parameter(torch.zeros(linear_layer.out_features, r)) 
+        self.scaling = lora_alpha / r 
         self.dropout = nn.Dropout(lora_dropout)
-        
-        # 冻结原始权重，只训练 LoRA 参数
+
         self.original.weight.requires_grad = False
         if self.original.bias is not None:
             self.original.bias.requires_grad = False
-        
-        # 初始化 LoRA 参数
+
         nn.init.kaiming_uniform_(self.lora_A, a=math.sqrt(5))
         nn.init.zeros_(self.lora_B)
 
     def forward(self, x):
-        # 原始输出
         orig_out = self.original(x) 
-        # LoRA 分支
         lora_out = self.dropout(x) @ self.lora_A.T.to(x.device) @ self.lora_B.T.to(x.device) * self.scaling
         return orig_out + lora_out
 
@@ -304,7 +300,7 @@ class SelfAttention(nn.Module):
         
         # qkv: amp, bf16
         #qkv = F.linear(input=x, weight=self.mat_qkv.weight, bias=torch.cat((self.q_bias, self.zero_k_bias, self.v_bias))).view(B, L, 3, self.num_heads, self.head_dim)  # BL3Hc   #原始的实现方式
-        qkv = self.mat_qkv(x).view(B, L, 3, self.num_heads, self.head_dim)  # BL3Hc   #适应lora的实现方式
+        qkv = self.mat_qkv(x).view(B, L, 3, self.num_heads, self.head_dim)  # BL3Hc 
         if self.using_flash: q, k, v = qkv.unbind(dim=2); L_dim = 1           # q or k or v: all are shaped in (B:batch_size, L:seq_len, H:heads, c:head_dim)
         else: q, k, v = qkv.permute(2, 0, 3, 1, 4).unbind(dim=0); L_dim = 2   # q or k or v: all are shaped in (B:batch_size, H:heads, L:seq_len, c:head_dim)
         
