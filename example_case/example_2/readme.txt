@@ -1,106 +1,99 @@
-# Example2 图像编辑管道使用说明
+Example2 Image Editing Pipeline Usage Guide
 
-## 功能概述
-Example2 是一个智能图像编辑管道，具有以下核心特点：
-- **背景保留功能**：结合用户提供的遮罩图像，智能保留原始背景
-- **两阶段训练**：先训练语言风格嵌入，再训练LoRA模型，确保编辑质量
-- **自动化处理**：完整的端到端处理流程，减少人工干预
+Functional Overview
+Example2 is an intelligent image editing pipeline with the following core features:
+• Background Preservation: Intelligently retains the original background by combining user-provided mask images
+• Two-Stage Training: First trains text embeddings, then trains the LoRA model to ensure editing quality
+• Automated Processing: Complete end-to-end processing flow minimizes manual intervention
 
-## 前置准备
-在运行管道前，请确保以下文件已准备就绪：
+Prerequisites
+Before running the pipeline, ensure the following files are prepared:
+Required Files
+1. Original Image: image/original_image.jpg
+2. Edit Prompt: prompt/edit_image_prompt.txt - describes how the image should be edited
+3. Mask Image: A mask image is required to specify foreground and background regions
 
-### 必需文件
-1. **原始图像**：`image/original_image.jpg`
-2. **编辑提示词**：`prompt/edit_image_prompt.txt` - 描述希望如何编辑图像
-3. **遮罩图像**：需要提供用于指定前景和背景区域的遮罩图像
+Environment Requirements
+• Ensure all dependency environments are correctly installed
+• Set up proper Python paths and CUDA environment
 
-### 环境要求
-- 确保所有依赖环境已正确安装
-- 设置正确的Python路径和CUDA环境
+Pipeline Execution Flow
 
-## 管道执行流程
+Step 1: Data Preparation
+Script: prepare_edit.sh
+Function:
+• Generates segmentation files (JSONL format) for the training dataset
+• Extracts multi-scale encoded features from images
+• Prepares necessary data structures for subsequent training
 
-### 步骤1：数据准备
-**脚本：** `prepare_edit.sh`
-**功能：**
-- 生成训练数据集的分割文件（JSONL格式）
-- 提取图像的多尺度编码特征
-- 为后续训练准备必要的数据结构
+Step 2: Text Embedding Training
+Script: train_EditInfinity_example2.sh
+Parameter Settings:
+train_textembedding=1          # Enable text embedding training
+train_textembedding_iter=10    # Train for 10 iterations
+use_textembedding=0            # Do not use pre-trained embeddings during training
+train_lora=0                   # Do not train LoRA in this stage
 
-### 步骤2：语言风格嵌入训练
-**脚本：** `train_EditInfinity_example2.sh`
-**参数设置：**
-```bash
-train_textembedding=1          # 启用语言风格嵌入训练
-train_textembedding_iter=10    # 训练10个迭代周期
-use_textembedding=0            # 训练阶段不使用预训练嵌入
-train_lora=0                   # 此阶段不训练LoRA
-```
 
-### 步骤3：LoRA模型训练
-**脚本：** `train_EditInfinity_example2.sh`
-**参数设置：**
-```bash
-train_textembedding=0          # 停止语言风格嵌入训练
-use_textembedding=1            # 使用步骤2训练的语言风格嵌入
-use_textembedding_iter=10      # 使用第10个迭代的嵌入权重
-train_lora=1                   # 启用LoRA训练
-train_lora_iter=50             # 训练50个迭代周期
-```
+Step 3: LoRA Model Training
+Script: train_EditInfinity_example2.sh
+Parameter Settings:
+train_textembedding=0          # Stop text embedding training
+use_textembedding=1            # Use text embeddings trained in Step 2
+use_textembedding_iter=10      # Use embedding weights from the 10th iteration
+train_lora=1                   # Enable LoRA training
+train_lora_iter=50             # Train for 50 iterations
 
-**替代方案：** 如果不想加载语言风格嵌入，可以设置：
-```bash
+Alternative Option: If you don't want to load text embeddings, set:
 train_textembedding=0
-use_textembedding=0            # 不加载语言风格嵌入
+use_textembedding=0            # Do not load text embeddings
 train_lora=1
 train_lora_iter=50
-```
 
-### 步骤4：最终图像推理
-**脚本：** `infer_EditInfinity_example2.sh`
-**参数设置：**
-```bash
-infer_function=2               # 用于最终图像生成
-use_concat_embedding=1         # 使用拼接的语言风格嵌入
-use_embedding_iter=10          # 使用第10个迭代的嵌入
-use_lora=1                     # 使用LoRA模型
-use_lora_iter=50               # 使用第50个迭代的LoRA权重
-```
 
-## 参数说明
+Step 4: Final Image Inference
+Script: infer_EditInfinity_example2.sh
+Parameter Settings:
+infer_function=2               # For final image generation
+use_concat_embedding=1         # Use concatenated text embeddings
+use_embedding_iter=10          # Use embeddings from the 10th iteration
+use_lora=1                     # Use LoRA model
+use_lora_iter=50               # Use LoRA weights from the 50th iteration
 
-### 训练参数
-- **`train_textembedding`**：是否启动语言风格嵌入训练（0/1）
-- **`train_textembedding_iter`**：语言风格嵌入训练的迭代次数
-- **`use_textembedding`**：是否使用预训练的语言风格嵌入（0/1）
-- **`use_textembedding_iter`**：使用哪个迭代的语言风格嵌入权重
-- **`train_lora`**：是否启动LoRA训练（0/1）
-- **`train_lora_iter`**：LoRA训练的迭代次数
+Parameter Explanation
 
-### 推理参数
-- **`infer_function`**：推理功能类型（2：最终图像生成）
-- **`use_concat_embedding`**：是否使用拼接的语言风格嵌入（0/1）
-- **`use_embedding_iter`**：使用哪个迭代的语言风格嵌入
-- **`use_lora`**：是否使用LoRA模型（0/1）
-- **`use_lora_iter`**：使用哪个迭代的LoRA权重
+Training Parameters
+• train_textembedding: Whether to start text embedding training (0/1)
+• train_textembedding_iter: Number of iterations for text embedding training
+• use_textembedding: Whether to use pre-trained text embeddings (0/1)
+• use_textembedding_iter: Which iteration's text embedding weights to use
+• train_lora: Whether to start LoRA training (0/1)
+• train_lora_iter: Number of iterations for LoRA training
 
-## 快速开始
-1. 准备必需的文件（图像、提示词和遮罩图像）
-2. 运行 `edit_pipeline.sh` 开始自动化处理
-3. 等待管道执行完成
-4. 查看输出目录中的结果文件
+Inference Parameters
+• infer_function: Inference function type (2: final image generation)
+• use_concat_embedding: Whether to use concatenated text embeddings (0/1)
+• use_embedding_iter: Which iteration's text embeddings to use
+• use_lora: Whether to use LoRA model (0/1)
+• use_lora_iter: Which iteration's LoRA weights to use
 
-## 输出结果
-管道执行完成后，将生成：
-- 训练好的模型权重文件
-- 最终编辑后的图像（保留原始背景）
+Quick Start
+1. Prepare required files (image, prompt, and mask image)
+2. Run edit_pipeline.sh to start automated processing
+3. Wait for pipeline execution to complete
+4. Check result files in the output directory
 
-## 与Example3的区别
-- **Example2**：需要用户提供遮罩图像来指定前景和背景区域
-- **Example3**：通过注意力机制自动生成遮罩图像，无需人工提供
+Output Results
+After pipeline execution completes, the following will be generated:
+• Trained model weight files
+• Final edited images (with original background preserved)
 
-## 注意事项
-- 可以仅使用语言风格嵌入或仅使用LoRA，只需将对应的参数设置为0
-- 确保各步骤的迭代次数设置一致，避免加载不存在的权重
-- 建议按照推荐的参数设置进行首次运行，后续可根据需要调整
-- 遮罩图像的质量直接影响背景保留效果，请确保遮罩准确标记前景区域
+Differences from Example3
+• Example2: Requires users to provide mask images to specify foreground and background regions
+• Example3: Automatically generates mask images through attention mechanism, no manual provision needed
+
+Important Notes
+• You can use only text embeddings or only LoRA by setting corresponding parameters to 0
+• Ensure iteration settings are consistent across steps to avoid loading non-existent weights
+• Recommended to use suggested parameter settings for initial runs, adjust as needed later
+• Mask image quality directly affects background preservation results - ensure masks accurately mark foreground regions
