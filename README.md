@@ -3,7 +3,7 @@ An open-source T2I editing model based on Infinity
 
 ## 🔥 Updates!!
 * Sep 22, 2025: 🤗 Code release
-* Sep 18, 2025: 🔥 EditInfinity is accepted as CVPR 2025 Poster
+* Sep 18, 2025: 🔥 EditInfinity is accepted as NeurIPS 2025 Poster
 
 ## 📑 Open-Source Plan
   - We will complete the organization of this code repository by October 24, 2025. Stay tuned.
