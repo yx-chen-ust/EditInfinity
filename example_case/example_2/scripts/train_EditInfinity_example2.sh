@@ -57,7 +57,7 @@ train_sub_dir="example_2/"
 # Whether to start text embedding training  
 train_textembedding = 0  
 # Number of iterations for training text embedding  
-train_textembedding_iter = 0  
+train_textembedding_iter = 10  
 
 # Number of iterations for using trained text embedding offset  
 use_textembedding = 1  
@@ -75,7 +75,7 @@ exit 1
 fi
 
 #wandb offline
-exp_name=debug_example1
+exp_name=train_example2
 bed_path=checkpoints/${exp_name}/
 data_path="${train_root_dir}${train_sub_dir}splits"   # path to the data for only finetune one image
 video_data_path=''
