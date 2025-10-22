@@ -18,12 +18,12 @@ text_encoder_ckpt=weights/flan-t5-xl
 text_channels=2048
 apply_spatial_patchify=0
 
-#选择inference的功能
+#Select inference function
 infer_function=2
 
-# 是否使用concat language style embedding
+# Whether to use concatenated language style embedding
 use_concat_embedding=1
-# 使用concat language style embedding的迭代次数
+# Iteration count for the concatenated language style embedding to use
 use_embedding_iter=10
 
 # LoRA parameters
@@ -33,12 +33,14 @@ lora_alpha=32  # LoRA alpha
 lora_dropout=0.1  # LoRA dropout rate
 use_lora_iter=50
 
+export CUDA_VISIBLE_DEVICES=0   #set GPU
+export PYTHONPATH=$PYTHONPATH:""  #Set its path ./EditInfinity as a relative path
 
-# 设置推理的数据路径
+ #set inference data path
 infer_root_dir="/data1/chenyuxin/code/Infinity_clone/example_case/"
 infer_sub_dir="example_2/"
 
-# 设置 inference 的 prompt：基于 infer_root_dir 与 infer_sub_dir 组合路径，从文件读取并移除末尾换行
+#set inference prompt
 prompt_file="${infer_root_dir}${infer_sub_dir}prompt/edit_image_prompt.txt"
 if [ -f "$prompt_file" ]; then
 prompt="$(tr -d '\n' < "$prompt_file")"
@@ -48,9 +50,6 @@ exit 1
 fi
 
 save_file="${infer_root_dir}${infer_sub_dir}output/edit_result_example2_result.jpg"
-
-export CUDA_VISIBLE_DEVICES=2   #设置GPU
-export PYTHONPATH=$PYTHONPATH:/data1/chenyuxin/code/Infinity_clone/  #设置相对路径
 
 # run inference
 python3 tools/run_infinity.py \
