@@ -36,7 +36,7 @@ export OMP_NUM_THREADS=8
 export NCCL_IB_DISABLE=0
 export NCCL_IB_GID_INDEX=3
 export NCCL_SOCKET_IFNAME=eno1
-export CUDA_VISIBLE_DEVICES=3,4
+export CUDA_VISIBLE_DEVICES=0,1
 
 BED=checkpoints
 LOCAL_OUT=local_output
@@ -50,42 +50,41 @@ export CUDA_TIMER_STREAM_KAFKA_CLUSTER=bmq_data_va
 export CUDA_TIMER_STREAM_KAFKA_TOPIC=megatron_cuda_timer_tracing_original_v2
 export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 
-train_root_dir="/data1/chenyuxin/code/Infinity_clone/example_case/"
+train_root_dir="./EditInfinity/example_case/"  #set inference data path
 train_sub_dir="example_1/"
 
-
-#是否启动语言风格embedding训练
+# Whether to enable language style embedding training
 train_textembedding=0
-#需要训练的语言风格embedding iter数
+# Number of iterations needed for language style embedding training
 train_textembedding_iter=0
 
-# 使用的训练语言风格偏移量embedding的iter数
+# Which iteration of trained language style offset embedding to use
 use_textembedding=1
 use_textembedding_iter=10
-#是否启动Lora训练
+# Whether to enable LoRA training
 train_lora=1
-#需要训练的lora iter数
+# Number of iterations needed for LoRA training
 train_lora_iter=50
 
-# 断言：train_textembedding 和 train_lora 至多只能有一个为 1
+# Assertion: train_textembedding and train_lora can have at most one set to 1
 if [ "${train_textembedding}" -eq 1 ] && [ "${train_lora}" -eq 1 ]; then
 echo "Error: train_textembedding and train_lora cannot both be 1" >&2
 exit 1
 fi
 
 #wandb offline
-exp_name=debug_example1
+exp_name=train_example1
 bed_path=checkpoints/${exp_name}/
 data_path="${train_root_dir}${train_sub_dir}splits"   # path to the data for only finetune one image
 video_data_path=''
 local_out_path=$LOCAL_OUT/${exp_name}
 
-
+#master_addr:Set the current server master addr
 torchrun \
 --nproc_per_node=2 \
 --nnodes=1 \
 --node_rank=0 \
---master_addr="10.249.189.212" \
+--master_addr="**.***.**.**" \ 
 --master_port=2988 \
 train.py \
 --ep=2 \
@@ -155,6 +154,3 @@ train.py \
 --train_sub_dir=${train_sub_dir} \
 --use_textembedding=${use_textembedding} \
 --use_textembedding_iter=${use_textembedding_iter} \
-
-#lbs is batchsize
-#--pn 1M means 1024*1024 pixels
