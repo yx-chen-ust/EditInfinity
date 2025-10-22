@@ -474,10 +474,10 @@ class Infinity(nn.Module):
         save_img_path=None,
         sampling_per_bits=1,
         infer_function = 0,
-        infer_root_dir=None,  # 添加根目录参数
-        infer_sub_dir=None,  # 添加子目录参数
-        word_token_mapping=None,  # 添加word到token的映射
-        target_words=None,  # 添加目标单词列表
+        infer_root_dir=None,  # Root directory parameter  
+        infer_sub_dir=None,  # Subdirectory parameter  
+        word_token_mapping=None,  # Word-to-token mapping  
+        target_words=None,  # Target words list
     ):   # returns List[idx_Bl]
         if g_seed is None: rng = None
         else: self.rng.manual_seed(g_seed); rng = self.rng
@@ -548,12 +548,12 @@ class Infinity(nn.Module):
 
 
 
-        #for each_scale_code edit
-        replace_all_each_scale_code = False  #替换each_scale_code,需要将each_scale_code替换为经过encode得到的each_scale_code，以此来保证获得准确的cross attention map
-        save_ori_bg_each_scale_code = False  #保存原图的背景（背景指的是除了mask的物体以外的部分），通过weighted插值保留each_scale_code的背景
-        original_autoregressive_func = False  #原始推理路径，需要保留
+        # For each_scale_code edit
+        replace_all_each_scale_code = False  # Replace each_scale_code to ensure accurate cross attention map
+        save_ori_bg_each_scale_code = False  # Save original background (non-masked areas) using weighted interpolation
+        original_autoregressive_func = False  # Original inference path
 
-        #设置各种功能的开关
+        # Feature toggle switches
         if infer_function == 0:
             original_autoregressive_func = True
         elif infer_function == 1:
@@ -632,15 +632,15 @@ class Infinity(nn.Module):
                     each_scale_code = F.interpolate(codes, size=vae_scale_schedule[-1], mode=vae.quantizer.z_interplote_up)  #always: torch.Size([1, 32, 1, 64, 64])
                     
                     #for each_scale_code edit
-                    #替换所有each_scale_code
+                    #replace all scale each_scale_code
                     if replace_all_each_scale_code == True:
-                        #获得encode后的each_scale_code
+                        #get each_scale_code
                         folder_path = os.path.join(infer_root_dir, infer_sub_dir, "each_scale_code/")
                         file_name = f"each_scale_code_{si}.pt"
                         file_path = os.path.join(folder_path, file_name)
                         loaded_tensor = torch.load(file_path)
                         device = each_scale_code.device
-                        loaded_tensor = loaded_tensor.to(device)   #encode后获得的each_scale_code
+                        loaded_tensor = loaded_tensor.to(device)  
                         each_scale_code = loaded_tensor
                     
                     #save weighted background code
@@ -652,9 +652,7 @@ class Infinity(nn.Module):
                         file_path = os.path.join(folder_path, file_name)
                         loaded_tensor = torch.load(file_path)
                         device = each_scale_code.device
-                        loaded_tensor = loaded_tensor.to(device)   #loaded_tensor:背景图
-
-                        #通过weighted矩阵对背景图进行加权，来实现让mask区域自行推理，其余部分weighted保留
+                        loaded_tensor = loaded_tensor.to(device)  
                         weighted_tensor = torch.load(os.path.join(infer_root_dir, infer_sub_dir, "weight_tensor/weighted_tensor.pt"))
                         weighted_tensor = weighted_tensor.to(device)
                         
@@ -673,15 +671,14 @@ class Infinity(nn.Module):
                     each_scale_code = codes
 
                     #edit each_scale_code
-                    #替换所有each_scale_code，来获得对应的self-attention的key和value
+                    #replace all scale each_scale_code
                     if replace_all_each_scale_code == True:
-                        #获得encode后的each_scale_code
                         folder_path = os.path.join(infer_root_dir, infer_sub_dir, "each_scale_code/")
                         file_name = f"each_scale_code_{si}.pt"
                         file_path = os.path.join(folder_path, file_name)
                         loaded_tensor = torch.load(file_path)
                         device = each_scale_code.device
-                        loaded_tensor = loaded_tensor.to(device)   #encode后获得的each_scale_code
+                        loaded_tensor = loaded_tensor.to(device)   
                         each_scale_code = loaded_tensor
 
                     #save weighted background code
@@ -693,9 +690,7 @@ class Infinity(nn.Module):
                         file_path = os.path.join(folder_path, file_name)
                         loaded_tensor = torch.load(file_path)
                         device = each_scale_code.device
-                        loaded_tensor = loaded_tensor.to(device)   #loaded_tensor:背景图
-
-                        #通过weighted矩阵对背景图进行加权，来实现让mask区域自行推理，其余部分weighted保留
+                        loaded_tensor = loaded_tensor.to(device) 
                         weighted_tensor = torch.load(os.path.join(infer_root_dir, infer_sub_dir, "weight_tensor/weighted_tensor.pt"))
                         weighted_tensor = weighted_tensor.to(device)
                         
@@ -728,15 +723,15 @@ class Infinity(nn.Module):
                 for module in block_chunk_.module.module:
                     (module.sa if isinstance(module, CrossAttnBlock) else module.attn).kv_caching(False)
 
-        # 收集并保存最终的attention maps
+        # Collect and save final attention maps
         if target_words is not None and len(target_words) > 0:
-            # 假设target_words只有一个元素（单词或短语）
+            # Assume target_words contains a single element (word or phrase)
             target_word = target_words[0] if isinstance(target_words, list) else target_words
             
             final_attention_map = None
             total_layers = 0
             
-            # 从所有CrossAttention模块收集attention maps
+            # Gather attention maps from all CrossAttention modules
             for b in self.block_chunks:
                 for m in b.module:
                     if hasattr(m, 'ca') and hasattr(m.ca, 'final_attention_maps'):
@@ -746,21 +741,21 @@ class Infinity(nn.Module):
                             else:
                                 final_attention_map += m.ca.final_attention_maps[target_word]
                             
-                            # 累加层数
+                            # Accumulate layer count
                             if hasattr(m.ca, 'attention_map_counts') and target_word in m.ca.attention_map_counts:
                                 total_layers += m.ca.attention_map_counts[target_word]
             
-            # 计算均值
+            # Calculate average
             if final_attention_map is not None and total_layers > 0:
                 final_attention_map /= total_layers
                 print(f"Target '{target_word}': averaged over {total_layers} layers, final map shape: {final_attention_map.shape}")
                 
-                # 保存最终结果
+                # Save final results
                 if infer_root_dir and infer_sub_dir:
                     save_path = os.path.join(infer_root_dir, infer_sub_dir, 'cross_attention_maps')
                     os.makedirs(save_path, exist_ok=True)
                     
-                    # 保存attention map
+                    # Save attention map
                     save_path = os.path.join(save_path, 'final_attention_map.pt')
                     torch.save(final_attention_map, save_path)
                     print(f"Saved final attention map for '{target_word}' to {save_path}")
@@ -877,19 +872,15 @@ class Infinity(nn.Module):
         from infinity.models.basic import LoRALinear
 
         for name, module in self.named_modules():
-            # 只处理 CrossAttnBlock 模块
             if "CrossAttnBlock" in str(type(module)):
-                # 处理 SelfAttention (sa)
                 if hasattr(module, "sa") and isinstance(module.sa, SelfAttention):
                     sa = module.sa
-                    # 替换 mat_qkv
                     if hasattr(sa, "mat_qkv") and isinstance(sa.mat_qkv, nn.Linear):
                         original_mat_qkv = sa.mat_qkv
                         sa.mat_qkv = LoRALinear(original_mat_qkv, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout)
                         sa.mat_qkv.original.weight.data = original_mat_qkv.weight.data
                         if original_mat_qkv.bias is not None:
                             sa.mat_qkv.original.bias.data = original_mat_qkv.bias.data
-                    # 替换 proj
                     if hasattr(sa, "proj") and isinstance(sa.proj, nn.Linear):
                         original_proj = sa.proj
                         sa.proj = LoRALinear(original_proj, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout)
@@ -897,24 +888,20 @@ class Infinity(nn.Module):
                         if original_proj.bias is not None:
                             sa.proj.original.bias.data = original_proj.bias.data
 
-                # 处理 CrossAttention (ca)
                 if hasattr(module, "ca") and isinstance(module.ca, CrossAttention):
                     ca = module.ca
-                    # 替换 mat_q (如果是 Linear)
                     if hasattr(ca, "mat_q") and isinstance(ca.mat_q, nn.Linear):
                         original_mat_q = ca.mat_q
                         ca.mat_q = LoRALinear(original_mat_q, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout)
                         ca.mat_q.original.weight.data = original_mat_q.weight.data
                         if original_mat_q.bias is not None:
                             ca.mat_q.original.bias.data = original_mat_q.bias.data
-                    # 替换 mat_kv
                     if hasattr(ca, "mat_kv") and isinstance(ca.mat_kv, nn.Linear):
                         original_mat_kv = ca.mat_kv
                         ca.mat_kv = LoRALinear(original_mat_kv, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout)
                         ca.mat_kv.original.weight.data = original_mat_kv.weight.data
                         if original_mat_kv.bias is not None:
                             ca.mat_kv.original.bias.data = original_mat_kv.bias.data
-                    # 替换 proj
                     if hasattr(ca, "proj") and isinstance(ca.proj, nn.Linear):
                         original_proj = ca.proj
                         ca.proj = LoRALinear(original_proj, r=r, lora_alpha=lora_alpha, lora_dropout=lora_dropout)
