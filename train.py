@@ -33,11 +33,10 @@ enable_timeline_sdk = False
 from torch.distributed.fsdp import FullyShardedDataParallel as FSDP
 from torch.distributed.fsdp import StateDictType
 
-
 def save_lora_weights(trainer, args, iteration):
-    assert isinstance(trainer.gpt, FSDP), "模型必须经过FSDP包装"
+    assert isinstance(trainer.gpt, FSDP), "Model must be wrapped with FSDP"
 
-    # 切换到 LOCAL_STATE_DICT 模式
+    # Switch to LOCAL_STATE_DICT mode
     from torch.distributed.fsdp import StateDictType
     with FSDP.state_dict_type(trainer.gpt, StateDictType.LOCAL_STATE_DICT):
         local_state = trainer.gpt.state_dict()
@@ -47,12 +46,12 @@ def save_lora_weights(trainer, args, iteration):
             if "lora_" in k.lower()
         }
 
-    # 收集所有 rank 的参数
+    # Gather parameters from all ranks
     world_size = torch.distributed.get_world_size()
     all_lora_states = [None] * world_size
     torch.distributed.all_gather_object(all_lora_states, lora_state_dict)
 
-    # 合并
+    # Merge the collected states
     if torch.distributed.get_rank() == 0:
         merged = {}
         for state in all_lora_states:
@@ -62,9 +61,9 @@ def save_lora_weights(trainer, args, iteration):
                     print(f"k{k}:v.shape:{v.shape}")
         print("Merged LoRA:", merged)
         
-        # 修改这部分路径处理代码
+        # Handle path processing
         if args.train_sub_dir.startswith('/'):
-            # 如果是绝对路径，移除开头的斜杠
+            # If absolute path, remove leading slash
             train_sub_dir = args.train_sub_dir[1:] if args.train_sub_dir.startswith('/') else args.train_sub_dir
         else:
             train_sub_dir = args.train_sub_dir
@@ -73,14 +72,13 @@ def save_lora_weights(trainer, args, iteration):
         save_path = os.path.join(save_path, "lora_weight")
         filename = f"lora_weight_{iteration}iter.pt"
 
-        # 检查目录是否存在，若不存在则创建
+        # Create directory if it doesn't exist
         if not os.path.exists(save_path):
             os.makedirs(save_path, exist_ok=True) 
 
-        # 保存模型
+        # Save the model
         torch.save(merged, os.path.join(save_path, filename))
-        print(f"模型已保存到{save_path}/{filename}")
-
+        print(f"Model saved to {save_path}/{filename}")
 
 def build_everything_from_args(args: arg_util.Args, saver):
     # set seed
@@ -155,11 +153,10 @@ def build_everything_from_args(args: arg_util.Args, saver):
 def get_lora_params(model):
     lora_params = []
     for name, param in model.named_parameters():
-        if "lora_" in name:  # 识别 LoRA 参数
-            param.requires_grad = True  # 确保可训练
+        if "lora_" in name:  # Identify LoRA parameters
+            param.requires_grad = True  # Ensure trainable
             lora_params.append(param)
     return lora_params
-
 
 def build_model_optimizer(args, vae_ckpt):
     from torch.nn.parallel import DistributedDataParallel as DDP
@@ -221,7 +218,7 @@ def build_model_optimizer(args, vae_ckpt):
         print(gpt_wo_ddp)
         
         '''
-        # 打印 LoRA 参数统计
+        # Print LoRA Parameter Statistics
         lora_state_dict = {
             name: param.data.cpu().clone()
             for name, param in gpt_wo_ddp.named_parameters()
@@ -306,8 +303,8 @@ def build_model_optimizer(args, vae_ckpt):
     torch.cuda.synchronize()
 
     if args.train_lora:
-        # =============== 修改后的优化器构建 ===============
-        # 1. 获取 LoRA 参数列表
+        # =============== Modified optimizer construction ===============
+        # 1. Get list of LoRA parameters
         lora_params = get_lora_params(gpt_ddp if args.zero else gpt_wo_ddp)
 
         if '_' in args.ada:
@@ -315,32 +312,32 @@ def build_model_optimizer(args, vae_ckpt):
         else:
             beta0, beta1 = float(args.ada), -1
 
-        # 2. 直接使用 LoRA 参数构建优化器（无需 nowd_keys 过滤）
+        # 2. Directly construct optimizer with LoRA parameters (no need for nowd_keys filtering)
         opt_clz = {
             'sgd':   partial(torch.optim.SGD, momentum=beta0, nesterov=True),
             'adam':  partial(torch.optim.AdamW, betas=(beta0, beta1), fused=args.afuse),
             'adamw': partial(torch.optim.AdamW, betas=(beta0, beta1), fused=args.afuse),
         }[args.opt]
 
-        opt_kw = dict(lr=args.tlr, weight_decay=0)  # 可对 LoRA 单独设置 weight_decay
+        opt_kw = dict(lr=args.tlr, weight_decay=0)  # Can set separate weight_decay for LoRA
         print("args.tlr:",args.tlr)
         if args.oeps: opt_kw['eps'] = args.oeps
 
-        # 3. 创建优化器（仅传入 LoRA 参数）
+        # 3. Create optimizer (only pass LoRA parameters)
         gpt_optim = AmpOptimizer(
             'gpt',
             args.fp16,
-            opt_clz(params=lora_params, **opt_kw),  # 关键修改：仅优化 lora_params
+            opt_clz(params=lora_params, **opt_kw),  # Key modification: only optimize lora_params
             gpt_ddp if args.zero else gpt_wo_ddp,
             args.r_accu,
             args.tclip,
             args.zero
         )
     elif args.train_textembedding:
-        # =============== build optimizer and text_embedding_offset===============
-        # 创建 text_embedding_offset 参数
+        # =============== Build optimizer and text_embedding_offset ===============
+        # Create text_embedding_offset parameter
         text_embedding_offset = torch.nn.Parameter(torch.zeros(1, args.tlen, args.Ct5, device=args.device))
-        # 创建新的优化器，只优化 text_embedding_offset
+        # Create new optimizer that only optimizes text_embedding_offset
         if '_' in args.ada:
             beta0, beta1 = map(float, args.ada.split('_'))
         else:
@@ -356,7 +353,7 @@ def build_model_optimizer(args, vae_ckpt):
         if args.oeps: opt_kw['eps'] = args.oeps
         print(f'[vgpt] optim={opt_clz}, opt_kw={opt_kw}\n')
         
-        # 创建一个简单的模型包装器来包含 text_embedding_offset
+        # Create a simple model wrapper to contain text_embedding_offset
         class EmbeddingModel(nn.Module):
             def __init__(self, embedding):
                 super().__init__()
@@ -648,17 +645,17 @@ def train_one_ep(
                     ndtimeline.flush()
 
             if args.train_textembedding and (g_it+1) % args.save_model_iters_freq == 0:
-                # 保存当前的 embedding
+                # Save current embedding
                 if dist.is_master():
-                    # 组合路径（自动处理斜杠）
+                    # Combine paths (automatically handle slashes)
                     full_path = os.path.join(args.train_root_dir, args.train_sub_dir)
-                    # 规范化路径（可选，移除多余的斜杠）
-                    full_path = os.path.normpath(full_path) + "/"  # 确保末尾有斜杠
-                    final_path = os.path.join(full_path, "trained_language_style_embedding") + "/"  # 再次确保末尾斜杠
+                    # Normalize path (optional, remove redundant slashes)
+                    full_path = os.path.normpath(full_path) + "/"  # Ensure trailing slash
+                    final_path = os.path.join(full_path, "trained_language_style_embedding") + "/"  # Ensure trailing slash again
                     embedding_path = os.path.join(final_path, f'embedding_it{it}.pth')
                     trainer.save_embedding(embedding_path)
                     print(f'[VGPTTr] Saved embedding to {embedding_path}')
-
+                    
             if args.train_lora and (g_it+1) % args.save_model_iters_freq == 0:
                 # save lora weights
                 save_lora_weights(trainer, args, g_it+1)
