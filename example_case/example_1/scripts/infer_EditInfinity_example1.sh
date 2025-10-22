@@ -18,12 +18,12 @@ text_encoder_ckpt=weights/flan-t5-xl
 text_channels=2048
 apply_spatial_patchify=0
 
-#选择inference的功能
+#Select inference function
 infer_function=0
 
-# 是否使用concat language style embedding
+# Whether to use concatenated language style embedding
 use_concat_embedding=1
-# 使用concat language style embedding的迭代次数
+# Iteration count for the concatenated language style embedding to use
 use_embedding_iter=10
 
 # LoRA parameters
