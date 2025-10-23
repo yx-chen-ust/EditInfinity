@@ -54,11 +54,13 @@ Quantitative results on PIE-Bench.
 Qualitative results on PIE-Bench across all nine tasks.
 <p>
 
+## ⚽️ Installation
+1. We use FlexAttention to speedup training, which requires `torch>=2.5.1`.
+2. Install other pip packages via `pip3 install -r requirements.txt`.
+3. Download weights from huggingface. Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl), [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) and [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) files to weights folder.
    
 ## 🕹️ Quick Start
-### 1. Download weights
-Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl), [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) and [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) files to weights folder.
-### 2. Run the three editing cases we have prepared
+### Run the three editing cases we have prepared
 We have prepared three different editing cases:
 
 #### Case 1: Full Image Editing (No Background Preservation)
