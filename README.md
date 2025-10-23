@@ -13,7 +13,7 @@ EditInfinity excels in background preservation, text alignment.
 ## 📑 Open-Source Plan
   - We will complete the organization of this code repository by October 24, 2025. Stay tuned.
 
-## ✨ Quick Start
+## 🕹️ Quick Start
 ### 1. Download weights
 Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl), [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) and [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) files to weights folder.
 ### 2. Run the three editing cases we have prepared
