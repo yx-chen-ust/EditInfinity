@@ -44,6 +44,10 @@ Given a source image and target editing requirements, the process follows these 
 
 <p align="center">
 <img src="assets/image6.png" width=95%>
+<p>
+
+<p align="center">
+<img src="assets/image6.png" width=95%>
 <img src="assets/image3.jpg" width=95%>
 <br>
 Quantitative results on PIE-Bench.
