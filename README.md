@@ -23,10 +23,10 @@ We have prepared three different editing cases:
 - **Script Path**: `./example_case/example_1/scripts/edit_pipeline.sh`
 - **Description**: This case does not involve background preservation and performs editing on the entire image. Note that you need to set the relative path `./EditInfinity/`
 - **Execution Command:**
-```bash
-bash example_case/example_1/scripts/edit_pipeline.sh
-```
-This command will automatically complete the text embedding, LoRA training, and inference pipeline sequentially.
+  ```bash
+  bash example_case/example_1/scripts/edit_pipeline.sh
+  ```
+  This command will automatically complete the text embedding, LoRA training, and inference pipeline sequentially.
 - **Parameter Configuration**: In the `./example_case/example_1/scripts/edit_pipeline.sh` script, you can freely choose whether to enable text embedding and LoRA training, as well as set the number of training iterations. During inference, you can also choose whether to use text embedding and LoRA training results with corresponding iteration numbers. Text embedding training for 10 iterations and LoRA training for 30 iterations are empirical choices, but we strongly recommend trying different iteration numbers as they may yield better results.
 
 #### Case 2: Background Preservation Editing (Requires User-Provided Mask)
