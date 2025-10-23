@@ -29,12 +29,17 @@ Given a source image $I_{sou}$ and its prompt $t_{sou}$, the process follows the
 2. Then, we concatenate $t_{sou}$ with an instruction $t_{ins}$ and a learnable prompt $t_l$ — where $t_l$ is optimized via $\mathcal{L}_{inv}$ under the supervision of $R_{1...K}^{sou}$.
 3. Afterwards, the prompt is frozen, and LoRA is applied to the FFN layers of Infinity to further reconstruct $I_{sou}$.
 
-### 🔥 Scaling Vocabulary benefits Reconstruction and Generation 📈:
+### 🔥 Image Editing with Holistic Smoothing:
 
 <p align="center">
-<img src="assets/scaling_vocabulary.png" width=95%>
+<img src="assets/image2_2.jpg" width=95%>
 <p>
 
+Given a source image and target editing requirements, the process follows these steps:
+1. First, we encode the source image into tokens $R_{1...K}^{sou}$.
+2. Then, at each step $k$ of autoregressive generation, the generated $R_k^{tar}$ is conditioned on the concatenation of the target prompt $t_{tar}$, instruction $t_{ins}$, and optimized learnable prompt $t_l$. It is then blended with $R_k^{sou}$ under the guidance of the piecewise linear smoothing kernel $\mathcal{G}$, forming edited tokens $E_k^{tar}$ to prepare for guiding the next-scale generation.
+3. Finally, $E_{1...K}^{tar}$ is decoded into the edited image.
+   
 ## 🕹️ Quick Start
 ### 1. Download weights
 Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl), [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) and [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) files to weights folder.
