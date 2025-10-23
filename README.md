@@ -61,7 +61,6 @@ Qualitative results on PIE-Bench across all nine tasks.
    
 ## 🕹️ Quick Start
 ### Run the three editing cases we have prepared
-We have prepared three different editing cases:
 
 #### Case 1: Full Image Editing (No Background Preservation)
 - **Script Path**: `./example_case/example_1/scripts/edit_pipeline.sh`
