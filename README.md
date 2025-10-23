@@ -40,7 +40,7 @@ Given a source image and target editing requirements, the process follows these 
 2. Then, at each step $k$ of autoregressive generation, the generated $R_k^{tar}$ is conditioned on the concatenation of the target prompt $t_{tar}$, instruction $t_{ins}$, and optimized learnable prompt $t_l$. It is then blended with $R_k^{sou}$ under the guidance of the piecewise linear smoothing kernel $\mathcal{G}$, forming edited tokens $E_k^{tar}$ to prepare for guiding the next-scale generation.
 3. Finally, $E_{1...K}^{tar}$ is decoded into the edited image.
 
-### 🔥 Results on PIE-Bench:
+### 🔥 Quantitative Results on PIE-Bench:
 
 <p align="center">
 <img src="assets/image3.jpg" width=95%>
@@ -48,6 +48,8 @@ Given a source image and target editing requirements, the process follows these 
 Quantitative results on PIE-Bench.
 <p>
   
+### 🔥 Qualitative Results on PIE-Bench:
+
 <p align="center">
 <img src="assets/image4.jpg" width=95%>
 <br>
