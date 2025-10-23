@@ -32,13 +32,28 @@ Given a source image $I_{sou}$ and its prompt $t_{sou}$, the process follows the
 ### 🔥 Image Editing with Holistic Smoothing:
 
 <p align="center">
-<img src="assets/image2_2.jpg" width=95%>
+  <img src="assets/image2_2.jpg" width=95%>
 <p>
 
 Given a source image and target editing requirements, the process follows these steps:
 1. First, we encode the source image into tokens $R_{1...K}^{sou}$.
 2. Then, at each step $k$ of autoregressive generation, the generated $R_k^{tar}$ is conditioned on the concatenation of the target prompt $t_{tar}$, instruction $t_{ins}$, and optimized learnable prompt $t_l$. It is then blended with $R_k^{sou}$ under the guidance of the piecewise linear smoothing kernel $\mathcal{G}$, forming edited tokens $E_k^{tar}$ to prepare for guiding the next-scale generation.
 3. Finally, $E_{1...K}^{tar}$ is decoded into the edited image.
+
+### 🔥 Results on PIE-Bench:
+
+<p align="center">
+<img src="assets/image3.jpg" width=95%>
+<br>
+Quantitative results on PIE-Bench.
+<p>
+  
+<p align="center">
+<img src="assets/image4.jpg" width=95%>
+<br>
+Qualitative results on PIE-Bench across all nine tasks.
+<p>
+
    
 ## 🕹️ Quick Start
 ### 1. Download weights
@@ -58,6 +73,8 @@ We have prepared three different editing cases:
 
 <p align="center">
 <img src="assets/image5.jpg" width=95%>
+<br>
+Illustrations of ablating the Learnable Prompt and LoRA.
 <p>
 
 #### Case 2: Background Preservation Editing (Requires User-Provided Mask)
