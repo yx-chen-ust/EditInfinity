@@ -2,8 +2,10 @@
 
 <p align="center">
 <img src="assets/image1.jpg" width=95%>
-<p>
-  
+<br>
+EditInfinity excels in background preservation, text alignment.
+</p>
+
 ## 🔥 Updates!!
 * Sep 22, 2025: 🤗 Code release
 * Sep 18, 2025: 🌺 EditInfinity is accepted as NeurIPS 2025 Poster
