@@ -43,6 +43,7 @@ Given a source image and target editing requirements, the process follows these 
 ### 🔥 Quantitative Results on PIE-Bench:
 
 <p align="center">
+<img src="assets/image6.png" width=95%>
 <img src="assets/image3.jpg" width=95%>
 <br>
 Quantitative results on PIE-Bench.
