@@ -10,9 +10,6 @@ EditInfinity excels in background preservation, text alignment.
 * Sep 22, 2025: 🤗 Code release
 * Sep 18, 2025: 🌺 EditInfinity is accepted as NeurIPS 2025 Poster
 
-## 📑 Open-Source Plan
-  - We will complete the organization of this code repository by October 24, 2025. Stay tuned.
-
 ## 📖 Introduction
   - We present EditInfinity, a parameter-efficient image editing method built upon the classical "image inversion-image editing" adaptation paradigm and applied to Infinity—a leading binary-quantized generative model. This work systematically explores the adaptation of vector-quantized (VQ) based generative models for image editing tasks.
   - EditInfinity incorporates an efficient yet powerful image inversion mechanism that integrates text prompt rectification and image style preservation, leveraging quantized representations as precise supervisory signals to achieve high-fidelity image reconstruction. Furthermore, a holistic smoothing strategy is devised to ensure that the edited results retain strong structural fidelity to the source image while maintaining accurate semantic alignment with the target text prompt.
@@ -26,7 +23,7 @@ EditInfinity excels in background preservation, text alignment.
 
 Given a source image $I_{sou}$ and its prompt $t_{sou}$, the inversion process follows these steps:
 1. First, we quantize $I_{sou}$ into exact tokens $R_{1...K}^{sou}$.
-2. Then, we concatenate $t_{sou}$ with an instruction $t_{ins}$ and a learnable prompt $t_l$ — where $t_l$ is optimized via ℒ_inv under the supervision of $R_{1...K}^{sou}$.
+2. Then, we concatenate $t_{sou}$ with an instruction $t_{ins}$ and a learnable prompt $t_l$ — where $t_l$ is optimized via &#x2112;<sub>inv</sub> ℒ_inv under the supervision of $R_{1...K}^{sou}$.
 3. Afterwards, the prompt is frozen, and LoRA is applied to the FFN layers of Infinity to further reconstruct $I_{sou}$.
 
 ### 🔥 Image Editing with Holistic Smoothing:
