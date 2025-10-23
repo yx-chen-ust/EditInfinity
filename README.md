@@ -26,7 +26,7 @@ EditInfinity excels in background preservation, text alignment.
 
 Given a source image $I_{sou}$ and its prompt $t_{sou}$, the inversion process follows these steps:
 1. First, we quantize $I_{sou}$ into exact tokens $R_{1...K}^{sou}$.
-2. Then, we concatenate $t_{sou}$ with an instruction $t_{ins}$ and a learnable prompt $t_l$ — where $t_l$ is optimized via \text{$\mathcal{L}_{inv}$} under the supervision of $R_{1...K}^{sou}$.
+2. Then, we concatenate $t_{sou}$ with an instruction $t_{ins}$ and a learnable prompt $t_l$ — where $t_l$ is optimized via $\\mathcal{L}_{inv}$ under the supervision of $R_{1...K}^{sou}$.
 3. Afterwards, the prompt is frozen, and LoRA is applied to the FFN layers of Infinity to further reconstruct $I_{sou}$.
 
 ### 🔥 Image Editing with Holistic Smoothing:
