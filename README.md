@@ -13,6 +13,7 @@ EditInfinity excels in background preservation, text alignment.
 </p>
 
 ## 🚀 Updates!!
+* Oct 24, 2025: 🍉 Paper release
 * Sep 22, 2025: 🤗 Code release
 * Sep 18, 2025: 🌺 EditInfinity is accepted as NeurIPS 2025 Poster
 
