@@ -106,10 +106,10 @@ If our work assists your research, feel free to give us a star ⭐ or cite us us
     title={EditInfinity: Image Editing with Binary-Quantized Generative Models}, 
     author={Jiahuan Wang and Yuxin Chen and Jun Yu and Guangming Lu and Wenjie Pei},
     year={2025},
-    eprint={},
-    archivePrefix={},
-    primaryClass={},
-    url={}, 
+    eprint={2510.20217},
+    archivePrefix={arXiv},
+    primaryClass={cs.CV},
+    url={https://arxiv.org/abs/2510.20217}, 
 }
 ```
 
