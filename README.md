@@ -1,5 +1,8 @@
 # EditInfinity: Image Editing with Binary-Quantized Generative Models
 
+<div align="center">
+[![arXiv](https://img.shields.io/badge/arXiv%20paper-2412.04431-b31b1b.svg)](https://arxiv.org/abs/2510.20217)&nbsp;
+
 <p align="center">
 <img src="assets/image1.jpg" width=95%>
 <br>
