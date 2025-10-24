@@ -15,7 +15,7 @@ EditInfinity excels in background preservation, text alignment.
 ## 🚀 Updates!!
 * Oct 24, 2025: 🍉 Paper release
 * Sep 22, 2025: 🤗 Code release
-* Sep 18, 2025: 🌺 EditInfinity is accepted as NeurIPS 2025 Poster
+* Sep 18, 2025: 🎉 EditInfinity is accepted to NeurIPS 2025!
 
 ## 📖 Introduction
   - We present EditInfinity, a parameter-efficient image editing method built upon the classical "image inversion-image editing" adaptation paradigm and applied to Infinity—a leading binary-quantized generative model. This work systematically explores the adaptation of vector-quantized (VQ) based generative models for image editing tasks.
