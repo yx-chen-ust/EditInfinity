@@ -12,6 +12,8 @@
 EditInfinity excels in background preservation, text alignment.
 </p>
 
+## 🔥🔥🔥 If you encounter any issues with the paper or code reproduction, feel free to submit an issue. I will respond within 24 hours. Let's work together to make this project better!
+
 ## 🚀 Updates!!
 * Oct 24, 2025: 🍉 Paper release
 * Sep 22, 2025: 🤗 Code release
