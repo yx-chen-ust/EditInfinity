@@ -13,6 +13,7 @@ EditInfinity excels in background preservation, text alignment.
 </p>
 
 ## 🔥🔥🔥 If you encounter any problems with the paper or code reproduction, feel free to submit an issue. I will respond within 24 hours. Let's work together to make this project better!
+* Alternatively, you can also reach me at ychenqa@connect.ust.hk Please note that the email address in the paper is incorrect, and we are working on fixing it.
 
 ## 🚀 Updates!!
 * Oct 24, 2025: 🍉 Paper release
