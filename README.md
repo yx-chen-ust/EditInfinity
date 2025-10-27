@@ -21,7 +21,7 @@ EditInfinity excels in background preservation, text alignment.
 * Sep 18, 2025: 🎉 EditInfinity is accepted to NeurIPS 2025!
 
 ## 📖 Introduction
-  - We present EditInfinity, a parameter-efficient image editing method built upon the classical "image inversion-image editing" adaptation paradigm and applied to Infinity—a leading binary-quantized generative model. This work systematically explores the adaptation of vector-quantized (VQ) based generative models for image editing tasks.
+  - We present EditInfinity, a parameter-efficient image editing method built upon the classical "image inversion-image editing" adaptation paradigm and applied to Infinity—a leading binary-quantized generative model. 
   - EditInfinity incorporates an efficient yet powerful image inversion mechanism that integrates text prompt rectification and image style preservation, leveraging quantized representations as precise supervisory signals to achieve high-fidelity image reconstruction. Furthermore, a holistic smoothing strategy is devised to ensure that the edited results retain strong structural fidelity to the source image while maintaining accurate semantic alignment with the target text prompt.
   - Extensive experiments conducted on the PIE-Bench benchmark demonstrate that EditInfinity significantly outperforms state-of-the-art diffusion-based approaches across a variety of editing operations. It excels particularly in background preservation and semantic consistency with the target text, showcasing robust and superior editing performance.
 
