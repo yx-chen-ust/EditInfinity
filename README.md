@@ -117,7 +117,14 @@ Download weights from huggingface to weights folder:
 1. Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl)
 2. Download [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main)
 3. Download [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) 
-
+cd ./EditInfinity
+### Full Weights Installation Example (Recommended)
+```bash
+mkdir weights
+huggingface-cli download google/flan-t5-xl --local-dir ./weights/flan-t5-xl --local-dir-use-symlinks False
+huggingface-cli download FoundationVision/Infinity --include infinity_2b_reg.pth --local-dir ./weights --local-dir-use-symlinks False
+huggingface-cli download FoundationVision/Infinity --include infinity_vae_d32reg.pth --local-dir ./weights --local-dir-use-symlinks False
+```
    
 ## 🕹️ Quick Start
 ### Run the three editing cases we have prepared
