@@ -33,9 +33,10 @@ echo "[master_port: ${master_port}]"
 
 # set up envs
 export OMP_NUM_THREADS=8
-export NCCL_IB_DISABLE=0
-export NCCL_IB_GID_INDEX=3
-export NCCL_SOCKET_IFNAME=eno1
+export NCCL_IB_DISABLE=1
+export NCCL_SOCKET_IFNAME=bond0         # or change to enp170s0f1np1 / enp41s0f1np1
+# export NCCL_DEBUG=INFO
+# export NCCL_DEBUG_SUBSYS=ALL
 export CUDA_VISIBLE_DEVICES=0,1
 
 BED=checkpoints
