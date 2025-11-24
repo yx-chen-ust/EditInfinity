@@ -8,7 +8,7 @@ use_bit_label=1
 checkpoint_type='torch'
 infinity_model_path=weights/infinity_2b_reg.pth
 vae_type=32
-vae_path=weights/infinity_vae_d32_reg.pth
+vae_path=weights/infinity_vae_d32reg.pth
 cfg=4
 tau=0.5
 rope2d_normalized_by_hw=2
@@ -34,7 +34,6 @@ lora_dropout=0.1  # LoRA dropout rate
 use_lora_iter=50
 
 export CUDA_VISIBLE_DEVICES=0   #set GPU
-export PYTHONPATH=$PYTHONPATH:""  #Set its path ./EditInfinity as a relative path
 
  #set inference data path
 infer_root_dir="./EditInfinity/example_case/"
