@@ -36,7 +36,7 @@ export OMP_NUM_THREADS=8
 export NCCL_IB_DISABLE=0
 export NCCL_IB_GID_INDEX=3
 export NCCL_SOCKET_IFNAME=eno1
-export CUDA_VISIBLE_DEVICES=3,4
+export CUDA_VISIBLE_DEVICES=0,1
 
 BED=checkpoints
 LOCAL_OUT=local_output
@@ -86,7 +86,7 @@ torchrun \
 --nproc_per_node=2 \
 --nnodes=1 \
 --node_rank=0 \
---master_addr="**.***.***.***" \
+--master_addr=localhost \
 --master_port=2988 \
 train.py \
 --ep=2 \
