@@ -12,7 +12,7 @@
 EditInfinity excels in background preservation, text alignment.
 </p>
 
-## 🔥🔥🔥 If you encounter any problems with the paper or code reproduction, feel free to submit an issue. I will respond within 24 hours. 
+## 🔥🔥🔥 If you encounter any problems with the paper or code reproduction, feel free to submit an issue. 
 * Alternatively, you can also reach me at ychenqa@connect.ust.hk 
 
 ## 🚀 Updates!!
