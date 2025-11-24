@@ -64,16 +64,11 @@ Quantitative results on PIE-Bench.
 Qualitative results on PIE-Bench across all nine tasks.
 <p>
 
-## ⚽️ Installation
-1. We use FlexAttention to speedup training, which requires `torch>=2.5.1`.
-2. Install other pip packages via `pip3 install -r requirements.txt`.
-3. Download weights from huggingface. Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl), [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) and [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) files to weights folder.
 
-
-## ⚽️Environment Setup
+## 🏐 Environment Setup
 This project requires **PyTorch ≥ 2.5.1** because we use **FlashAttention** to accelerate training.
 ### 1. Install PyTorch (required)
-Make sure to install a PyTorch version that is compatible with FlashAttention.
+Make sure to install a PyTorch version ≥ 2.5.1 that is compatible with FlashAttention.
 Example for **CUDA Toolkit 11.8**:
 ```bash
 pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 torchaudio==2.5.1+cu118 --index-url https://download.pytorch.org/whl/cu118
@@ -99,7 +94,7 @@ Then install it:
 pip install flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 ```
 ### Full Installation Example (Recommended)
-Example using **conda**:
+Example using **CUDA Toolkit 11.8**:
 ```bash
 conda create -n EditInfinity python=3.10
 conda activate EditInfinity
@@ -117,6 +112,11 @@ pip install -r requirements.txt
 pip install flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 ```
 
+## ⚾️ Pretrain-Weights Setup
+Download weights from huggingface to weights folder:
+1. Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl)
+2. Download [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main)
+3. Download [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) 
 
    
 ## 🕹️ Quick Start
