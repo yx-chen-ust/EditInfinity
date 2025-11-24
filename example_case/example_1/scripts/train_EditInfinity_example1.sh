@@ -79,12 +79,12 @@ data_path="${train_root_dir}${train_sub_dir}splits"   # path to the data for onl
 video_data_path=''
 local_out_path=$LOCAL_OUT/${exp_name}
 
-#master_addr:Set the current server master addr
+
 torchrun \
 --nproc_per_node=2 \
 --nnodes=1 \
 --node_rank=0 \
---master_addr="**.***.**.**" \ 
+--master_addr="localhost" \ 
 --master_port=2988 \
 train.py \
 --ep=2 \
