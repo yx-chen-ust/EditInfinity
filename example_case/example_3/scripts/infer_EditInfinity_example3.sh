@@ -34,7 +34,6 @@ lora_dropout=0.1  # LoRA dropout rate
 use_lora_iter=50
 
 export CUDA_VISIBLE_DEVICES=0   #set GPU
-export PYTHONPATH=$PYTHONPATH:""  #Set its path ./EditInfinity as a relative path
 
 #set inference data path
 infer_root_dir="./EditInfinity/example_case/"
