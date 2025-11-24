@@ -68,6 +68,56 @@ Qualitative results on PIE-Bench across all nine tasks.
 1. We use FlexAttention to speedup training, which requires `torch>=2.5.1`.
 2. Install other pip packages via `pip3 install -r requirements.txt`.
 3. Download weights from huggingface. Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl), [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) and [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) files to weights folder.
+
+
+## ⚽️Environment Setup
+This project requires **PyTorch ≥ 2.5.1** because we use **FlashAttention** to accelerate training.
+### 1. Install PyTorch (required)
+Make sure to install a PyTorch version that is compatible with FlashAttention.
+Example for **CUDA Toolkit 11.8**:
+```bash
+pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 torchaudio==2.5.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+```
+### 2. Install other dependencies
+```bash
+pip install -r requirements.txt
+```
+### 3. Install FlashAttention
+Download a matching prebuilt wheel from the official release page:
+👉 [FlashAttention Releases](https://github.com/Dao-AILab/flash-attention/releases/)
+You must choose a wheel that matches:
+* Your **CUDA** version
+* Your **PyTorch** version
+* Your **Python** version
+#### Example (CUDA 11.8 + PyTorch 2.5.1 + Python 3.10)
+From release page (e.g., [v2.7.3](https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.3)), download:
+```
+flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+```
+Then install it:
+```bash
+pip install flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+```
+### Full Installation Example (Recommended)
+Example using **conda**:
+```bash
+conda create -n EditInfinity python=3.10
+conda activate EditInfinity
+```
+1. Install PyTorch:
+```bash
+pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 torchaudio==2.5.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+```
+2. Install project dependencies:
+```bash
+pip install -r requirements.txt
+```
+3. Install FlashAttention:
+```bash
+pip install flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
+```
+
+
    
 ## 🕹️ Quick Start
 ### Run the three editing cases we have prepared
