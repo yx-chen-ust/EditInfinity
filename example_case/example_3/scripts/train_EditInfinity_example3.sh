@@ -50,7 +50,7 @@ export CUDA_TIMER_STREAM_KAFKA_CLUSTER=bmq_data_va
 export CUDA_TIMER_STREAM_KAFKA_TOPIC=megatron_cuda_timer_tracing_original_v2
 export PYTORCH_CUDA_ALLOC_CONF="expandable_segments:True"
 
-train_root_dir="/data1/chenyuxin/code/Infinity_clone/example_case/"
+train_root_dir="example_case/"
 train_sub_dir="example_3/"
 
 
