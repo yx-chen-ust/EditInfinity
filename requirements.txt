@@ -9,7 +9,7 @@ pandas
 timm==0.9.6
 decord
 transformers
-torch==2.5.1
+scipy
 pytz
 pandas
 wandb
@@ -19,4 +19,3 @@ einops
 openai
 httpx==0.20.0
 opencv-python
-flash_attn
