@@ -118,7 +118,7 @@ train.py \
 --Ct5=2048 \
 --t5_path=weights/flan-t5-xl \
 --vae_type 32 \
---vae_ckpt=weights/infinity_vae_d32_reg.pth \
+--vae_ckpt=weights/infinity_vae_d32reg.pth \
 --rush_resume=weights/infinity_2b_reg.pth \
 --wp 0.00000001 \
 --wpe=1 \
