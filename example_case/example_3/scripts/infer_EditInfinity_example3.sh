@@ -36,7 +36,7 @@ use_lora_iter=50
 export CUDA_VISIBLE_DEVICES=0   #set GPU
 
 #set inference data path
-infer_root_dir="./example_case/"
+infer_root_dir="example_case/"
 infer_sub_dir="example_3/"
 
 #set inference prompt
