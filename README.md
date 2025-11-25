@@ -139,7 +139,7 @@ After making this change, you can directly execute the following command:
   ```
   This command will automatically complete the text embedding, LoRA training, and inference pipeline sequentially.
   Note: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_1/train_EditInfinity_example1.sh`, for example:  
-export NCCL_SOCKET_IFNAME=eth0  
+`export NCCL_SOCKET_IFNAME=eth0`
 (Replace "eth0" with your actual available network interface name)
 - **Parameter Configuration**: In the `./example_case/example_1/scripts/edit_pipeline.sh` script, you can freely choose whether to enable text embedding and LoRA training, as well as set the number of training iterations. During inference, you can also choose whether to use text embedding and LoRA training results with corresponding iteration numbers. Text embedding training for 10 iterations and LoRA training for 20 iterations are empirical choices, but we strongly recommend trying different iteration numbers as they may yield better results.
 
