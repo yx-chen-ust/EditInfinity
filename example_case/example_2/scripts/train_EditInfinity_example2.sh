@@ -55,18 +55,18 @@ train_sub_dir="example_2/"
 
 
 # Whether to start text embedding training  
-train_textembedding = 0  
+train_textembedding=0  
 # Number of iterations for training text embedding  
-train_textembedding_iter = 10  
+train_textembedding_iter=10  
 
 # Number of iterations for using trained text embedding offset  
-use_textembedding = 1  
-use_textembedding_iter = 10  
+use_textembedding=1  
+use_textembedding_iter=10  
 
 # Whether to start LoRA training  
-train_lora = 1  
+train_lora=1  
 # Number of iterations for training LoRA  
-train_lora_iter = 50  
+train_lora_iter=50
 
 # Assertion: At most one of train_textembedding and train_lora can be set to 1
 if [ "${train_textembedding}" -eq 1 ] && [ "${train_lora}" -eq 1 ]; then
