@@ -35,7 +35,7 @@ echo "[master_port: ${master_port}]"
 export OMP_NUM_THREADS=8
 export NCCL_IB_DISABLE=0
 export NCCL_IB_GID_INDEX=3
-export NCCL_SOCKET_IFNAME=eno1
+export NCCL_SOCKET_IFNAME=eno1   #or bond0 ; Select a usable network interface
 export CUDA_VISIBLE_DEVICES=0,1
 
 BED=checkpoints
