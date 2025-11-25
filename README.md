@@ -132,13 +132,13 @@ huggingface-cli download FoundationVision/Infinity --include infinity_vae_d32reg
 #### Case 1: Full Image Editing (No Background Preservation)
 - **Script Path**: `./example_case/example_1/scripts/edit_pipeline.sh`
 - **Description**: This case does not involve background preservation and performs editing on the entire image.
-- **Execution:**: First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_1/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
+- **Execution**: First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_1/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
 After making this change, you can directly execute the following command:
   ```bash
   bash example_case/example_1/scripts/edit_pipeline.sh
   ```
   This command will automatically complete the text embedding, LoRA training, and inference pipeline sequentially.
-- **Note:**: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_1/train_EditInfinity_example1.sh`, for example:  
+- **Note**: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_1/train_EditInfinity_example1.sh`, for example:  
 `export NCCL_SOCKET_IFNAME=eth0`(Replace "eth0" with your actual available network interface name)
 - **Parameter Configuration**: In the `./example_case/example_1/scripts/edit_pipeline.sh` script, you can freely choose whether to enable text embedding and LoRA training, as well as set the number of training iterations. During inference, you can also choose whether to use text embedding and LoRA training results with corresponding iteration numbers. Text embedding training for 10 iterations and LoRA training for 20 iterations are empirical choices, but we strongly recommend trying different iteration numbers as they may yield better results.
 
@@ -151,21 +151,27 @@ Illustrations of ablating the Learnable Prompt and LoRA.
 #### Case 2: Background Preservation Editing (Requires User-Provided Mask)
 - **Script Path**: `./example_case/example_2/scripts/edit_pipeline.sh`
 - **Description**: This case involves background preservation operations and requires users to provide a background mask image.
-- **Execution Command:**
+- **Execution Command:** First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_2/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
+After making this change, you can directly execute the following command:
   ```bash
   bash example_case/example_2/scripts/edit_pipeline.sh
   ```
   This command will automatically complete the entire editing pipeline.
+- **Note**: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_2/train_EditInfinity_example2.sh`, for example:  
+`export NCCL_SOCKET_IFNAME=eth0`(Replace "eth0" with your actual available network interface name)
 - **Parameter Configuration**: Similar to Case 1, you can freely set desired parameters in the `./example_case/example_2/scripts/edit_pipeline.sh` script without modifying other code files.
 
 #### Case 3: Background Preservation Editing (Automatic Mask Segmentation)
 - **Script Path**: `./example_case/example_3/scripts/edit_pipeline.sh`
 - **Description**: This case involves background preservation operations but does not require users to provide a background mask image. The model will automatically segment the mask image for the target word based on the provided `./example_case/example_3/prompt/target_word.txt` and the threshold specified in `./example_case/example_3/scripts/get_weighted_tensor.sh`. Threshold=0.5 is an empirical choice, but you can adjust the threshold value based on the segmentation results to automatically obtain a better mask image.
-- **Execution Command:**
+- **Execution Command:** First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_3/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
+After making this change, you can directly execute the following command:
   ```bash
   bash example_case/example_3/scripts/edit_pipeline.sh
   ```
   This command will automatically complete the entire editing pipeline.
+- **Note**: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_3/train_EditInfinity_example3.sh`, for example:  
+`export NCCL_SOCKET_IFNAME=eth0`(Replace "eth0" with your actual available network interface name)
 - **Parameter Configuration**: As before, you can freely set desired parameters in the `./example_case/example_3/scripts/edit_pipeline.sh` script without modifying other code files.
   
 ## 📖 Citation
