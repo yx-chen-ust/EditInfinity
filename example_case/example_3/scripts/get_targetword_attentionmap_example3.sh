@@ -37,7 +37,7 @@ export CUDA_VISIBLE_DEVICES=0   #set GPU
 export PYTHONPATH=$PYTHONPATH:""  #Set its path ./EditInfinity as a relative path
 
  #set inference data path
-infer_root_dir="./EditInfinity/example_case/"
+infer_root_dir="example_case/"
 infer_sub_dir="example_3/"
 
 #set inference prompt
