@@ -131,9 +131,8 @@ huggingface-cli download FoundationVision/Infinity --include infinity_vae_d32reg
 
 #### Case 1: Full Image Editing (No Background Preservation)
 - **Script Path**: `./example_case/example_1/scripts/edit_pipeline.sh`
-- **Description**: This case does not involve background preservation and performs editing on the entire image. Note that you need to set the relative path `./EditInfinity/`
-- **Execution Command:**
-  First, you need to modify the export PYTHONPATH=$PYTHONPATH:"" line in the ./example_case/example_1/scripts/edit_pipeline.sh file to the correct relative path. For example, set it to:  export PYTHONPATH=$PYTHONPATH:/project/EditInfinity  
+- **Description**: This case does not involve background preservation and performs editing on the entire image.
+- **Execution:**: First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_1/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
 After making this change, you can directly execute the following command:
   ```bash
   bash example_case/example_1/scripts/edit_pipeline.sh
