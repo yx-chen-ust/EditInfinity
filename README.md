@@ -93,7 +93,7 @@ Then install it:
 ```bash
 pip install flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 ```
-### Full Installation Example (Recommended)
+### 4. Full Installation Example (Recommended)
 Example using **CUDA Toolkit 11.8**:
 ```bash
 conda create -n EditInfinity python=3.10
