@@ -12,7 +12,7 @@ set -x
 # 4) Run inference (load both text embedding and LoRA)
 
 # Paths (adjust only if your tree layout differs)
-EX1_ROOT="EditInfinity/example_case/example_3"
+EX1_ROOT="example_case/example_3"
 PREPARE_SH="${EX1_ROOT}/scripts/prepare_edit.sh"
 TRAIN_SH="${EX1_ROOT}/scripts/train_EditInfinity_example3.sh"
 INFER_SH="${EX1_ROOT}/scripts/infer_EditInfinity_example3.sh"
