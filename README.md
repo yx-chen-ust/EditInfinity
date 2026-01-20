@@ -13,7 +13,6 @@ EditInfinity excels in background preservation, text alignment.
 </p>
 
 ## 🔥🔥🔥 If you encounter any problems with the paper or code reproduction, feel free to submit an issue. 
-* Alternatively, you can also reach me at ychenqa@connect.ust.hk 
 
 ## 🚀 Updates!!
 * Nov 25, 2025: 🍈 We will present our poster at Exhibit Hall C, D, E #4518 in San Diego on December 4th from 11:00 to 14:00. Everyone is welcome to come and exchange ideas
