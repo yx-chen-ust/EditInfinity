@@ -178,11 +178,13 @@ After making this change, you can directly execute the following command:
 If our work assists your research, feel free to give us a star ⭐ or cite us using:
 
 ```
-@article{EditInfinity,
-  title={EditInfinity: Image Editing with Binary-Quantized Generative Models},
+@article{wang2026editinfinity,
+  title={Editinfinity: Image editing with binary-quantized generative models},
   author={Wang, Jiahuan and Chen, Yuxin and Yu, Jun and Lu, Guangming and Pei, Wenjie},
-  journal={arXiv preprint arXiv:2510.20217},
-  year={2025}
+  journal={Advances in Neural Information Processing Systems},
+  volume={38},
+  pages={50763--50790},
+  year={2026}
 }
 ```
 
