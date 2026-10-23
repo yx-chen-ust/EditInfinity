@@ -2,7 +2,7 @@
 
 # EditInfinity: Image Editing with Binary-Quantized Generative Models
 
-**Official implementation · NeurIPS 2025**
+**NeurIPS 2025**
 
 [![Paper](https://img.shields.io/badge/Paper-arXiv-b31b1b?style=flat&labelColor=555555)](https://arxiv.org/abs/2510.20217)
 [![License](https://img.shields.io/badge/License-MIT-blue?style=flat&labelColor=555555)](LICENSE)
