@@ -1,183 +1,198 @@
-# EditInfinity: Image Editing with Binary-Quantized Generative Models
-
 <div align="center">
 
-[![arXiv](https://img.shields.io/badge/arXiv%20paper-2510.20217-b31b1b.svg)](https://arxiv.org/abs/2510.20217)&nbsp;
+# EditInfinity: Image Editing with Binary-Quantized Generative Models
+
+**Official implementation · NeurIPS 2025**
+
+[![Paper](https://img.shields.io/badge/Paper-arXiv-b31b1b?style=flat&labelColor=555555)](https://arxiv.org/abs/2510.20217)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=flat&labelColor=555555)](LICENSE)
+
+**[Introduction](#introduction) · [Method](#method) · [Results](#results) · [Setup](#environment-setup) · [Quick Start](#quick-start) · [Citation](#citation)**
 
 </div>
 
 <p align="center">
-<img src="assets/image1.jpg" width=95%>
-<br>
-EditInfinity excels in background preservation, text alignment.
+  <img src="assets/image1.jpg" alt="Image editing examples from EditInfinity" width="95%">
+  <br>
+  <em>EditInfinity excels in <strong>background preservation</strong> and <strong>text alignment</strong>.</em>
 </p>
 
-## 🔥🔥🔥 If you encounter any problems with the paper or code reproduction, feel free to submit an issue. 
+💬 Questions about the paper or reproducing the results? Please [open an issue](https://github.com/yx-chen-ust/EditInfinity/issues).
 
-## 🚀 Updates!!
-* Nov 25, 2025: 🍈 We will present our poster at Exhibit Hall C, D, E #4518 in San Diego on December 4th from 11:00 to 14:00. Everyone is welcome to come and exchange ideas
-* Oct 24, 2025: 🍉 Paper release
-* Sep 22, 2025: 🤗 Code release
-* Sep 18, 2025: 🎉 EditInfinity is accepted to NeurIPS 2025!
+## 📰 News
+
+- **Nov 25, 2025:** Poster session announced for **December 4, 11:00–14:00**, at **Exhibit Hall C, D, E #4518**, San Diego.
+- **Oct 24, 2025:** 📄 Paper released.
+- **Sep 22, 2025:** 💻 Code released.
+- **Sep 18, 2025:** 🎉 EditInfinity accepted to **NeurIPS 2025**!
+
+<a id="introduction"></a>
 
 ## 📖 Introduction
-- We present EditInfinity, a parameter-efficient image editing method built upon the "inversion-editing" paradigm and applied to Infinity—a leading binary-quantized generative model.
-- The method integrates text prompt rectification and style preservation through an efficient inversion mechanism, using quantized representations as supervision for high-fidelity reconstruction. A holistic smoothing strategy further ensures structural fidelity to the source image and semantic alignment with the target prompt.
-- Extensive experiments on PIE-Bench show that EditInfinity significantly outperforms state-of-the-art diffusion-based models across various editing tasks, particularly excelling in background preservation and semantic consistency.
 
-### 🔥 Image Inversion with Exact Supervision:
+- **Parameter-efficient image editing.** EditInfinity follows the inversion-editing paradigm on top of **Infinity**, a binary-quantized generative model.
+- **Faithful reconstruction and editing.** Text prompt rectification and style preservation use exact quantized representations as supervision. **Holistic smoothing** further preserves source-image structure while aligning edits with the target prompt.
+- **Strong results on PIE-Bench.** EditInfinity outperforms state-of-the-art diffusion-based models across editing tasks, with particular strengths in **background preservation** and **semantic consistency**.
+
+<a id="method"></a>
+
+## 🧩 Method
+
+### Image Inversion with Exact Supervision
 
 <p align="center">
-  <img src="assets/image2.jpg" width="95%">
+  <img src="assets/image2.jpg" alt="Image inversion with exact token supervision" width="95%">
 </p>
 
-Given a source image $I_{sou}$ and its prompt $t_{sou}$, the inversion process follows these steps:
-1. First, we quantize $I_{sou}$ into exact tokens $R_{1...K}^{sou}$.
-2. Then, we concatenate $t_{sou}$ with an instruction $t_{ins}$ and a learnable prompt $t_l$ — where $t_l$ is optimized via &#x2112;<sub>inv</sub> under the supervision of $R_{1...K}^{sou}$.
-3. Afterwards, the prompt is frozen, and LoRA is applied to the FFN layers of Infinity to further reconstruct $I_{sou}$.
+Given a source image $I_{sou}$ and its prompt $t_{sou}$:
 
-### 🔥 Image Editing with Holistic Smoothing:
+1. **Quantize the image** into exact tokens $R_{1...K}^{sou}$.
+2. **Optimize the learnable prompt.** Concatenate $t_{sou}$, an instruction $t_{ins}$, and a learnable prompt $t_l$. Optimize $t_l$ with $\mathcal{L}_{inv}$ under the supervision of $R_{1...K}^{sou}$.
+3. **Refine the reconstruction.** Freeze the prompt and apply **LoRA** to Infinity's FFN layers to further reconstruct $I_{sou}$.
 
-<p align="center">
-  <img src="assets/image2_2.jpg" width=95%>
-<p>
-
-Given a source image and target editing requirements, the process follows these steps:
-1. First, we encode the source image into tokens $R_{1...K}^{sou}$.
-2. Then, at each step $k$ of autoregressive generation, the generated $R_k^{tar}$ is conditioned on the concatenation of the target prompt $t_{tar}$, instruction $t_{ins}$, and optimized learnable prompt $t_l$. It is then blended with $R_k^{sou}$ under the guidance of the piecewise linear smoothing kernel $\mathcal{G}$, forming edited tokens $E_k^{tar}$ to prepare for guiding the next-scale generation.
-3. Finally, $E_{1...K}^{tar}$ is decoded into the edited image.
-
-### 🔥 Quantitative Results on PIE-Bench:
+### Image Editing with Holistic Smoothing
 
 <p align="center">
-<img src="assets/image6.png" width=95%>
-<img src="assets/image3.jpg" width=95%>
-<br>
-Quantitative results on PIE-Bench.
-<p>
-  
-### 🔥 Qualitative Results on PIE-Bench:
+  <img src="assets/image2_2.jpg" alt="Image editing with holistic smoothing" width="95%">
+</p>
+
+Given a source image and a target editing prompt:
+
+1. **Encode the source image** into tokens $R_{1...K}^{sou}$.
+2. **Generate and blend tokens.** At each autoregressive step $k$, generate $R_k^{tar}$ conditioned on the target prompt $t_{tar}$, instruction $t_{ins}$, and optimized prompt $t_l$. Blend it with $R_k^{sou}$ using the piecewise linear smoothing kernel $\mathcal{G}$ to form $E_k^{tar}$, which guides the next-scale generation.
+3. **Decode the edited image** from $E_{1...K}^{tar}$.
+
+<a id="results"></a>
+
+## 📊 Results
+
+### Quantitative Results on PIE-Bench
 
 <p align="center">
-<img src="assets/image4.jpg" width=95%>
-<br>
-Qualitative results on PIE-Bench across all nine tasks.
-<p>
+  <img src="assets/image6.png" alt="Quantitative comparison on PIE-Bench" width="95%">
+  <img src="assets/image3.jpg" alt="Additional quantitative results on PIE-Bench" width="95%">
+  <br>
+  <em>Quantitative results on PIE-Bench.</em>
+</p>
 
+### Qualitative Results on PIE-Bench
 
-## 🏐 Environment Setup
-This project requires **PyTorch ≥ 2.5.1** because we use **FlashAttention** to accelerate training.
-### 1. Install PyTorch (required)
-Make sure to install a PyTorch version ≥ 2.5.1 that is compatible with FlashAttention.
-Example for **CUDA Toolkit 11.8**:
+<p align="center">
+  <img src="assets/image4.jpg" alt="Qualitative editing results across all nine PIE-Bench tasks" width="95%">
+  <br>
+  <em>Qualitative results across all nine editing tasks.</em>
+</p>
+
+<a id="environment-setup"></a>
+
+## 🔧 Environment Setup
+
+**Requirements:** PyTorch **≥ 2.5.1**, CUDA, and a compatible **FlashAttention** build. The example below uses **Python 3.10 · PyTorch 2.5.1 · CUDA 11.8**.
+
 ```bash
-pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 torchaudio==2.5.1+cu118 --index-url https://download.pytorch.org/whl/cu118
-```
-### 2. Install other dependencies
-```bash
-pip install -r requirements.txt
-```
-### 3. Install FlashAttention
-Download a matching prebuilt wheel from the official release page:
-👉 [FlashAttention Releases](https://github.com/Dao-AILab/flash-attention/releases/)
-You must choose a wheel that matches:
-* Your **CUDA** version
-* Your **PyTorch** version
-* Your **Python** version
-#### Example (CUDA 11.8 + PyTorch 2.5.1 + Python 3.10)
-From release page (e.g., [v2.7.3](https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.3)), download:
-```
-flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
-```
-Then install it:
-```bash
-pip install flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
-```
-### 4. Full Installation Example (Recommended)
-Example using **CUDA Toolkit 11.8**:
-```bash
-conda create -n EditInfinity python=3.10
+git clone https://github.com/yx-chen-ust/EditInfinity.git
+cd EditInfinity
+
+conda create -n EditInfinity python=3.10 -y
 conda activate EditInfinity
-```
-1. Install PyTorch:
-```bash
-pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 torchaudio==2.5.1+cu118 --index-url https://download.pytorch.org/whl/cu118
-```
-2. Install project dependencies:
-```bash
+
+pip install torch==2.5.1+cu118 torchvision==0.20.1+cu118 torchaudio==2.5.1+cu118 \
+  --index-url https://download.pytorch.org/whl/cu118
 pip install -r requirements.txt
 ```
-3. Install FlashAttention:
+
+Download a wheel from [FlashAttention Releases](https://github.com/Dao-AILab/flash-attention/releases/) that matches your **CUDA, PyTorch, Python, platform, and C++ ABI**. For the environment above on Linux x86_64, the [v2.7.3](https://github.com/Dao-AILab/flash-attention/releases/tag/v2.7.3) example is:
+
 ```bash
+# Run after downloading the wheel to the current directory.
 pip install flash_attn-2.7.3+cu11torch2.5cxx11abiFALSE-cp310-cp310-linux_x86_64.whl
 ```
 
-## ⚾️ Pretrain-Weights Setup
-Download weights from huggingface to weights folder:
-1. Download [flan-t5-xl](https://huggingface.co/google/flan-t5-xl)
-2. Download [`infinity_2b_reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main)
-3. Download [`infinity_vae_d32reg.pth`](https://huggingface.co/FoundationVision/Infinity/tree/main) 
-### Full Weights Installation Example (Recommended)
+<a id="pretrained-weights"></a>
+
+## 📦 Pretrained Weights
+
+Download the following weights from **Hugging Face**. Run these and all subsequent commands from the **repository root**.
+
+| Component | Model | Local path |
+|:--|:--|:--|
+| Text encoder | [FLAN-T5-XL](https://huggingface.co/google/flan-t5-xl) | `weights/flan-t5-xl/` |
+| Generative model | [Infinity 2B](https://huggingface.co/FoundationVision/Infinity/tree/main) | `weights/infinity_2b_reg.pth` |
+| Image tokenizer | [Infinity VAE](https://huggingface.co/FoundationVision/Infinity/tree/main) | `weights/infinity_vae_d32reg.pth` |
+
 ```bash
-cd ./EditInfinity
-mkdir weights
+mkdir -p weights
 huggingface-cli download google/flan-t5-xl --local-dir ./weights/flan-t5-xl --local-dir-use-symlinks False
 huggingface-cli download FoundationVision/Infinity --include infinity_2b_reg.pth --local-dir ./weights --local-dir-use-symlinks False
 huggingface-cli download FoundationVision/Infinity --include infinity_vae_d32reg.pth --local-dir ./weights --local-dir-use-symlinks False
 ```
-   
-## 🕹️ Quick Start
-### Run the three editing cases we have prepared
 
-#### Case 1: Full Image Editing (No Background Preservation)
-- **Script Path**: `./example_case/example_1/scripts/edit_pipeline.sh`
-- **Description**: This case does not involve background preservation and performs editing on the entire image.
-- **Execution**: First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_1/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
-After making this change, you can directly execute the following command:
-  ```bash
-  bash example_case/example_1/scripts/edit_pipeline.sh
-  ```
-  This command will automatically complete the text embedding, LoRA training, and inference pipeline sequentially.
-- **Note**: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_1/train_EditInfinity_example1.sh`, for example:  
-`export NCCL_SOCKET_IFNAME=eno1`(Replace "eno1" with your actual available network interface name)
-- **Parameter Configuration**: In the `./example_case/example_1/scripts/edit_pipeline.sh` script, you can freely choose whether to enable text embedding and LoRA training, as well as set the number of training iterations. During inference, you can also choose whether to use text embedding and LoRA training results with corresponding iteration numbers. Text embedding training for 10 iterations and LoRA training for 20 iterations are empirical choices, but we strongly recommend trying different iteration numbers as they may yield better results.
+<a id="quick-start"></a>
+
+## 🚀 Quick Start
+
+Complete [Environment Setup](#environment-setup) and download the [pretrained weights](#pretrained-weights), then try one of the **three prepared examples** below.
+
+### 1. Choose an editing example
+
+| Example | Editing mode | Mask input |
+|:--|:--|:--|
+| [**Case 1**](example_case/example_1) | Full-image editing without background preservation | None |
+| [**Case 2**](example_case/example_2) | Editing with background preservation | User-provided `image/mask.png` |
+| [**Case 3**](example_case/example_3) | Editing with background preservation | Automatically generated from `prompt/target_word.txt` |
+
+**Case 3:** Set the target word in [`target_word.txt`](example_case/example_3/prompt/target_word.txt). Adjust `--threshold` in [`get_weighted_tensor.sh`](example_case/example_3/scripts/get_weighted_tensor.sh) if needed; the default is **0.5**.
+
+### 2. Configure paths and hardware
+
+From the **repository root**, make the project importable for all pipeline stages:
+
+```bash
+export PYTHONPATH="$PWD${PYTHONPATH:+:$PYTHONPATH}"
+```
+
+Check the training launcher for your chosen case: `example_case/example_N/scripts/train_EditInfinity_exampleN.sh` (replace `N` with **1**, **2**, or **3**).
+
+- **GPUs:** The launchers default to `CUDA_VISIBLE_DEVICES=0,1` and `--nproc_per_node=2`. Adjust both to match your available GPUs. Preparation, inference, and attention-map scripts use GPU `0` by default; update their `CUDA_VISIBLE_DEVICES` settings if needed.
+- **Network:** Set `NCCL_SOCKET_IFNAME` to an available interface on your machine; the scripts use `eno1` by default. If the rendezvous port is already in use, change `--master_port` as well.
+
+### 3. Run the pipeline
+
+Choose a case and launch its complete editing pipeline:
+
+```bash
+EDIT_CASE=1  # Choose 1, 2, or 3.
+bash "example_case/example_${EDIT_CASE}/scripts/edit_pipeline.sh"
+```
+
+Each pipeline runs **data preparation → learnable prompt training → LoRA training → inference**. Case 3 also generates a target-word attention map and background mask before final inference.
+
+**Results** are saved under `example_case/example_N/output/` for the selected case.
+
+### 4. Customize inputs and parameters
+
+- **Inputs:** To edit your own image, replace `image/original_image.jpg`, `prompt/original_image_prompt.txt`, and `prompt/edit_image_prompt.txt` in the selected example folder. For **Case 2**, also provide `image/mask.png` (**black:** edit; **white:** preserve); for **Case 3**, update `prompt/target_word.txt`.
+- **Training:** Edit the selected `scripts/edit_pipeline.sh` to adjust the training stages and iteration counts. The current pipelines use **10 learnable-prompt iterations** and **50 LoRA iterations**; try different values for your image and editing prompt.
+- **Inference:** Keep the loaded prompt and LoRA iteration numbers consistent with the checkpoints produced during training. Set these in the pipeline, which updates the training and inference scripts automatically.
+
+<details>
+<summary><strong>🔍 Learnable Prompt and LoRA ablation</strong></summary>
 
 <p align="center">
-<img src="assets/image5.jpg" width=95%>
-<br>
-Illustrations of ablating the Learnable Prompt and LoRA.
-<p>
+  <img src="assets/image5.jpg" alt="Ablation study of the Learnable Prompt and LoRA" width="95%">
+  <br>
+  <em>Effect of the Learnable Prompt and LoRA on editing results.</em>
+</p>
 
-#### Case 2: Background Preservation Editing (Requires User-Provided Mask)
-- **Script Path**: `./example_case/example_2/scripts/edit_pipeline.sh`
-- **Description**: This case involves background preservation operations and requires users to provide a background mask image.
-- **Execution Command:** First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_2/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
-After making this change, you can directly execute the following command:
-  ```bash
-  bash example_case/example_2/scripts/edit_pipeline.sh
-  ```
-  This command will automatically complete the entire editing pipeline.
-- **Note**: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_2/train_EditInfinity_example2.sh`, for example:  
-`export NCCL_SOCKET_IFNAME=eno1`(Replace "eno1" with your actual available network interface name)
-- **Parameter Configuration**: Similar to Case 1, you can freely set desired parameters in the `./example_case/example_2/scripts/edit_pipeline.sh` script without modifying other code files.
+</details>
 
-#### Case 3: Background Preservation Editing (Automatic Mask Segmentation)
-- **Script Path**: `./example_case/example_3/scripts/edit_pipeline.sh`
-- **Description**: This case involves background preservation operations but does not require users to provide a background mask image. The model will automatically segment the mask image for the target word based on the provided `./example_case/example_3/prompt/target_word.txt` and the threshold specified in `./example_case/example_3/scripts/get_weighted_tensor.sh`. Threshold=0.5 is an empirical choice, but you can adjust the threshold value based on the segmentation results to automatically obtain a better mask image.
-- **Execution Command:** First, you need to modify the `export PYTHONPATH=$PYTHONPATH:""` line in the `./example_case/example_3/scripts/edit_pipeline.sh` file to the correct relative path. For example, set it to: `export PYTHONPATH=$PYTHONPATH:/project/EditInfinity`  
-After making this change, you can directly execute the following command:
-  ```bash
-  bash example_case/example_3/scripts/edit_pipeline.sh
-  ```
-  This command will automatically complete the entire editing pipeline.
-- **Note**: You may encounter unavailable network port issues. You need to set an available network interface in `./example_case/example_3/train_EditInfinity_example3.sh`, for example:  
-`export NCCL_SOCKET_IFNAME=eno1`(Replace "eno1" with your actual available network interface name)
-- **Parameter Configuration**: As before, you can freely set desired parameters in the `./example_case/example_3/scripts/edit_pipeline.sh` script without modifying other code files.
-  
-## 📖 Citation
-If our work assists your research, feel free to give us a star ⭐ or cite us using:
+<a id="citation"></a>
 
-```
+## 📝 Citation
+
+If you find EditInfinity useful in your research, please consider giving us a **star ⭐** and citing our work:
+
+```bibtex
 @article{wang2026editinfinity,
   title={Editinfinity: Image editing with binary-quantized generative models},
   author={Wang, Jiahuan and Chen, Yuxin and Yu, Jun and Lu, Guangming and Pei, Wenjie},
@@ -188,5 +203,6 @@ If our work assists your research, feel free to give us a star ⭐ or cite us us
 }
 ```
 
-## 🍭 Acknowledgement
-Our work is built upon the foundation of [Infinity](https://github.com/FoundationVision/Infinity/tree/main).Thank them for their excellent work.
+## 🙏 Acknowledgements
+
+Our work is built on [**Infinity**](https://github.com/FoundationVision/Infinity/tree/main). We thank the authors for their excellent work and open-source contribution.
