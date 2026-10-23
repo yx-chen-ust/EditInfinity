@@ -44,11 +44,11 @@
   <img src="assets/image2.jpg" alt="Image inversion with exact token supervision" width="95%">
 </p>
 
-Given a source image $I_{sou}$ and its prompt $t_{sou}$:
+Given a source image $`I_{sou}`$ and its prompt $`t_{sou}`$:
 
-1. **Quantize the image** into exact tokens $R_{1...K}^{sou}$.
-2. **Optimize the learnable prompt.** Concatenate $t_{sou}$, an instruction $t_{ins}$, and a learnable prompt $t_l$. Optimize $t_l$ with $\mathcal{L}_{inv}$ under the supervision of $R_{1...K}^{sou}$.
-3. **Refine the reconstruction.** Freeze the prompt and apply **LoRA** to Infinity's FFN layers to further reconstruct $I_{sou}$.
+1. **Quantize the image** into exact tokens $`R_{1...K}^{sou}`$.
+2. **Optimize the learnable prompt.** Concatenate $`t_{sou}`$, an instruction $`t_{ins}`$, and a learnable prompt $`t_l`$. Optimize $`t_l`$ with $`\mathcal{L}_{inv}`$ under the supervision of $`R_{1...K}^{sou}`$.
+3. **Refine the reconstruction.** Freeze the prompt and apply **LoRA** to Infinity's FFN layers to further reconstruct $`I_{sou}`$.
 
 ### Image Editing with Holistic Smoothing
 
@@ -58,9 +58,9 @@ Given a source image $I_{sou}$ and its prompt $t_{sou}$:
 
 Given a source image and a target editing prompt:
 
-1. **Encode the source image** into tokens $R_{1...K}^{sou}$.
-2. **Generate and blend tokens.** At each autoregressive step $k$, generate $R_k^{tar}$ conditioned on the target prompt $t_{tar}$, instruction $t_{ins}$, and optimized prompt $t_l$. Blend it with $R_k^{sou}$ using the piecewise linear smoothing kernel $\mathcal{G}$ to form $E_k^{tar}$, which guides the next-scale generation.
-3. **Decode the edited image** from $E_{1...K}^{tar}$.
+1. **Encode the source image** into tokens $`R_{1...K}^{sou}`$.
+2. **Generate and blend tokens.** At each autoregressive step $`k`$, generate $`R_k^{tar}`$ conditioned on the target prompt $`t_{tar}`$, instruction $`t_{ins}`$, and optimized prompt $`t_l`$. Blend it with $`R_k^{sou}`$ using the piecewise linear smoothing kernel $`\mathcal{G}`$ to form $`E_k^{tar}`$, which guides the next-scale generation.
+3. **Decode the edited image** from $`E_{1...K}^{tar}`$.
 
 <a id="results"></a>
 
